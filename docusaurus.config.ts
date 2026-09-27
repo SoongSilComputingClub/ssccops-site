@@ -6,11 +6,19 @@ import type * as Preset from '@docusaurus/preset-classic';
 // 이 파일은 Node에서 돈다. 브라우저 API·JSX를 쓰지 않는다.
 
 const REPO = 'SoongSilComputingClub/ssccops-site';
+// 설명서는 아직 메타 레포에서 이 주소로 나간다. 한 절씩 이 레포로 옮기는 동안은 링크만 건다(ADR-0054 추신).
+const GUIDE_URL = 'https://guide.sscc-ssu.com';
 
 const config: Config = {
   title: 'SSCCOps',
   tagline: '숭실컴퓨팅클럽의 회원·학술·업무·행사·폼을 한 곳에서 다루는 시스템',
-  favicon: 'img/favicon.ico',
+  // 아이콘은 icon/SSCC-Flat.png를 벡터로 옮긴 것이다. GitHub처럼 배경 없이 다크 모드에서 밝은 색으로 바뀌고,
+  // SVG를 못 읽는 브라우저는 어두운 색 favicon.ico를 쓴다.
+  headTags: [
+    {tagName: 'link', attributes: {rel: 'icon', href: '/favicon.ico', sizes: '32x32'}},
+    {tagName: 'link', attributes: {rel: 'icon', href: '/img/favicon.svg', type: 'image/svg+xml'}},
+    {tagName: 'link', attributes: {rel: 'apple-touch-icon', href: '/img/apple-touch-icon.png'}},
+  ],
 
   future: {
     v4: true,
@@ -22,6 +30,10 @@ const config: Config = {
   projectName: 'ssccops-site',
 
   onBrokenLinks: 'throw',
+
+  customFields: {
+    guideUrl: GUIDE_URL,
+  },
 
   markdown: {
     // `.md`는 CommonMark(GFM)로, `.mdx`만 MDX로 읽는다. 기본값(전부 MDX)이면 본문의 `{`·`<`가
@@ -72,11 +84,31 @@ const config: Config = {
     },
     navbar: {
       title: 'SSCCOps',
-      items: [{to: '/blog', label: '블로그', position: 'left'}],
+      items: [
+        {href: GUIDE_URL, label: '사용 설명서', position: 'left'},
+        {to: '/blog', label: '블로그', position: 'left'},
+        {href: `https://github.com/${REPO}`, label: 'GitHub', position: 'right'},
+      ],
     },
     footer: {
       style: 'dark',
-      links: [],
+      links: [
+        {
+          title: 'SSCCOps',
+          items: [
+            {label: '사용 설명서', href: GUIDE_URL},
+            {label: '블로그', to: '/blog'},
+          ],
+        },
+        {
+          title: '동아리',
+          items: [{label: 'SSCC 홈페이지', href: 'https://www.sscc-ssu.com'}],
+        },
+        {
+          title: '소스',
+          items: [{label: 'GitHub', href: `https://github.com/${REPO}`}],
+        },
+      ],
       copyright: `© ${new Date().getFullYear()} SSCC 숭실컴퓨팅클럽`,
     },
     prism: {
