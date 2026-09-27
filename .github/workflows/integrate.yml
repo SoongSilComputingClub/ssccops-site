@@ -1,0 +1,48 @@
+name: Integrate
+
+# 타입 검사와 빌드를 본다. 사이트 빌드는 그 자체가 검사다 — 깨진 링크(onBrokenLinks·onBrokenMarkdownLinks),
+# 등록되지 않은 작성자(onInlineAuthors)는 빌드를 멈추게 설정해 두었다(docusaurus.config.ts).
+#
+# Cloudflare Pages도 PR마다 빌드하지만(미리보기) 그쪽 실패는 Cloudflare 대시보드에만 남는다.
+# 여기서 한 번 더 도는 것은 실패를 PR의 체크로 보이게 하기 위해서다.
+#
+# pnpm/action-setup은 setup-node보다 먼저 와야 cache:'pnpm'이 동작한다(ssccops-web integrate.yml과 같다).
+# pnpm 버전은 package.json의 packageManager가, Node 버전은 .nvmrc가 정한다 — 여기 다시 적지 않는다.
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+
+concurrency:
+  group: integrate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build

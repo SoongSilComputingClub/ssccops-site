@@ -1,0 +1,84 @@
+name: "♻️ Refactor"
+description: "보이는 것은 그대로 두고 구조만 바꾸기"
+title: "[REFACTOR] "
+labels: ["refactor"]
+type: SubTask
+body:
+  - type: markdown
+    attributes:
+      value: |
+        제목 앞 `[REFACTOR]`를 **지우지 마세요.** 이 접두사로 브랜치(`refactor/#번호`)와 라벨이 자동 생성됩니다.
+
+        생성 후 상단 **Parent issue**에서 `ssccops`의 Story·Task를 연결하세요 (cross-repo 가능) —
+        Epic에 닿지 않는 이슈는 어디에도 잡히지 않습니다.
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: 📦 대상
+      description: 어느 자리를 바꾸는지가 경로와 리뷰어를 정합니다.
+      options:
+        - "blog/ 블로그 글"
+        - "guide/ 사용 설명서 (메타 레포에서 한 절씩 옮겨 오는 중)"
+        - "src/ 랜딩, 테마, 컴포넌트"
+        - "설정과 빌드 (docusaurus.config, 워크플로, 의존성)"
+        - "여러 곳"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📄 설명
+      description: |
+        **지금 구조의 무엇이 불편한가.** 바꾼 뒤에도 주소와 화면이 같아야 한다 — 주소가 바뀌면 리팩터링이 아니다.
+      placeholder: |
+        설명서가 HTML 한 장이라 절 하나를 고쳐도 381KB 파일 전체가 diff에 잡힌다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: work
+    attributes:
+      label: ✅ 작업할 내용
+      description: 체크박스로 씁니다.
+      value: |
+        - [ ]
+        - [ ]
+      placeholder: |
+        - [ ] 첫 절을 마크다운으로 옮긴다
+        - [ ] /guide 주소가 그대로인지 확인한다
+    validations:
+      required: true
+
+  - type: textarea
+    id: rejected
+    attributes:
+      label: 🚫 검토했으나 택하지 않은 길
+      description: |
+        비워 두지 않습니다 — 없으면 6개월 뒤 같은 논의를 다시 합니다. 따져 본 대안이 없으면 «없음»이라고 적습니다.
+    validations:
+      required: false
+
+  - type: textarea
+    id: precheck
+    attributes:
+      label: 🔍 먼저 확인할 것
+      description: |
+        글·설명서면 **공개 경계**(내부 IP·서버 구성·메타 레포 이슈 링크·회원 정보·비밀값)를, 설정이면 무엇으로 검증하는지를 적습니다.
+      placeholder: |
+        - [ ] `pnpm build`가 통과한다 (깨진 링크·미등록 작성자는 빌드가 막는다)
+        - [ ] PR의 Cloudflare 미리보기에서 실제 화면을 본다
+    validations:
+      required: false
+
+  - type: textarea
+    id: refs
+    attributes:
+      label: 🙋🏻 참고 자료
+      description: 상위 이슈, 관련 ADR·파일.
+      placeholder: |
+        - 상위: SoongSilComputingClub/ssccops#522
+        - ADR-0054
+    validations:
+      required: false

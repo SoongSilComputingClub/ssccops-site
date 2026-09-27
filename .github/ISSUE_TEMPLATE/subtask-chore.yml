@@ -1,0 +1,77 @@
+name: "🧹 Chore"
+description: "설정, 빌드, 의존성, CI, 작업 규칙"
+title: "[CHORE] "
+labels: ["chore"]
+type: SubTask
+body:
+  - type: markdown
+    attributes:
+      value: |
+        제목 앞 `[CHORE]`를 **지우지 마세요.** 이 접두사로 브랜치(`chore/#번호`)와 라벨이 자동 생성됩니다.
+
+        생성 후 상단 **Parent issue**에서 `ssccops`의 Story·Task를 연결하세요 (cross-repo 가능) —
+        Epic에 닿지 않는 이슈는 어디에도 잡히지 않습니다.
+
+        **블로그 글과 설명서는 📝 Docs 템플릿을 쓰세요.**
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: 📦 대상
+      description: 어느 자리를 바꾸는지가 경로와 리뷰어를 정합니다.
+      options:
+        - "blog/ 블로그 글"
+        - "guide/ 사용 설명서 (메타 레포에서 한 절씩 옮겨 오는 중)"
+        - "src/ 랜딩, 테마, 컴포넌트"
+        - "설정과 빌드 (docusaurus.config, 워크플로, 의존성)"
+        - "여러 곳"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📄 설명
+      description: |
+        **무엇이 불편했는지.** 설정 작업도 이유가 있습니다 — 무엇이 깨졌는지, 무엇을 못 찾았는지.
+      placeholder: |
+        Docusaurus가 글마다 OG 이미지를 만들지 않아, 링크를 공유하면 모든 글이 같은 카드로 보인다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: work
+    attributes:
+      label: ✅ 작업할 내용
+      description: 체크박스로 씁니다.
+      value: |
+        - [ ]
+        - [ ]
+      placeholder: |
+        - [ ] 빌드 때 OG 이미지를 굽는 방법을 고른다
+        - [ ] 한 글로 시험하고 결과를 적는다
+    validations:
+      required: true
+
+  - type: textarea
+    id: precheck
+    attributes:
+      label: 🔍 먼저 확인할 것
+      description: |
+        글·설명서면 **공개 경계**(내부 IP·서버 구성·메타 레포 이슈 링크·회원 정보·비밀값)를, 설정이면 무엇으로 검증하는지를 적습니다.
+      placeholder: |
+        - [ ] `pnpm build`가 통과한다 (깨진 링크·미등록 작성자는 빌드가 막는다)
+        - [ ] PR의 Cloudflare 미리보기에서 실제 화면을 본다
+    validations:
+      required: false
+
+  - type: textarea
+    id: refs
+    attributes:
+      label: 🙋🏻 참고 자료
+      description: 상위 이슈, 관련 ADR·파일.
+      placeholder: |
+        - 상위: SoongSilComputingClub/ssccops#522
+        - ADR-0054
+    validations:
+      required: false
