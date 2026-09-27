@@ -1,0 +1,10 @@
+# 작성자는 GitHub ID로 적는다(SoongSilComputingClub/ssccops ADR-0054).
+# 키도 이름도 GitHub ID다 — 실명을 적지 않는다. 글의 frontmatter는 `authors: [키]`로 가리킨다.
+# 등록되지 않은 작성자를 글에 적으면 빌드가 멈춘다(docusaurus.config.ts의 onInlineAuthors: 'throw').
+
+swthewhite:
+  name: swthewhite
+  url: https://github.com/swthewhite
+  image_url: https://github.com/swthewhite.png
+  socials:
+    github: swthewhite

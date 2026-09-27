@@ -2,37 +2,39 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+// SSCCOps 공개 사이트 — 랜딩 · 사용 설명서 · 블로그 (SoongSilComputingClub/ssccops ADR-0054)
+// 이 파일은 Node에서 돈다. 브라우저 API·JSX를 쓰지 않는다.
+
+const REPO = 'SoongSilComputingClub/ssccops-site';
 
 const config: Config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
+  title: 'SSCCOps',
+  tagline: '숭실컴퓨팅클럽의 회원·학술·업무·행사·폼을 한 곳에서 다루는 시스템',
   favicon: 'img/favicon.ico',
 
-  // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
-    v4: true, // Improve compatibility with the upcoming Docusaurus v4
+    v4: true,
   },
 
-  // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
+  url: 'https://ssccops.sscc-ssu.com',
   baseUrl: '/',
-
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'SoongSilComputingClub',
+  projectName: 'ssccops-site',
 
   onBrokenLinks: 'throw',
 
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
+  markdown: {
+    // `.md`는 CommonMark(GFM)로, `.mdx`만 MDX로 읽는다. 기본값(전부 MDX)이면 본문의 `{`·`<`가
+    // 코드로 해석돼 평범한 글이 빌드를 깬다 — 글은 순수 GFM으로 쓴다는 규칙(ADR-0054 규칙 1)과 같은 선택이다.
+    format: 'detect',
+    hooks: {
+      onBrokenMarkdownLinks: 'throw',
+    },
+  },
+
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: 'ko',
+    locales: ['ko'],
   },
 
   presets: [
@@ -41,14 +43,20 @@ const config: Config = {
       {
         docs: false,
         blog: {
+          routeBasePath: 'blog',
           showReadingTime: true,
+          blogTitle: '블로그',
+          blogDescription: 'SSCCOps를 만들고 운영하며 정한 것과 겪은 것',
+          blogSidebarTitle: '모든 글',
+          blogSidebarCount: 'ALL',
           feedOptions: {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          // Useful options to enforce blogging best practices
+          editUrl: `https://github.com/${REPO}/edit/develop/`,
           onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
+          // 작성자는 authors.yml에 등록된 GitHub ID만 받는다(ADR-0054 — 작성자 표기).
+          onInlineAuthors: 'throw',
           onUntruncatedBlogPosts: 'warn',
         },
         theme: {
@@ -63,19 +71,18 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'My Site',
-      items: [
-        {to: '/blog', label: 'Blog', position: 'left'},
-      ],
+      title: 'SSCCOps',
+      items: [{to: '/blog', label: '블로그', position: 'left'}],
     },
     footer: {
       style: 'dark',
       links: [],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `© ${new Date().getFullYear()} SSCC 숭실컴퓨팅클럽`,
     },
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+      additionalLanguages: ['java', 'bash', 'yaml', 'sql'],
     },
   } satisfies Preset.ThemeConfig,
 };
