@@ -13,7 +13,7 @@ develop에 머지되는 순간 발행된다. 아직 공개하면 안 되는 글�
 
 <!--
 이 변경이 **어느 결정에서 나왔는가** — 메타 이슈 `SoongSilComputingClub/ssccops#N` 또는 `ADR-NNNN`.
-`pr-guard.yml`이 이 패턴을 검사한다.
+`pr-guard.yml`이 이 패턴을 검사한다. 글 작업(`[DOCS]` 이슈)이면 비워 둔다(ssccops ADR-0061).
 -->
 
 - 근거: SoongSilComputingClub/ssccops#

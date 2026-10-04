@@ -2,6 +2,8 @@
 # 규칙이 바뀌면 세 작업 레포(server·web·site)를 함께 고친다.
 # 아래 «근거» 절의 deploy-history는 web에만 있다. 이 레포는 배포 이력을 남기지 않지만, PR에서 결정으로
 # 거슬러 올라갈 수 있게 하려는 목적은 같아서 검사를 그대로 둔다.
+# 단 글 작업(`[DOCS]` 이슈)은 «근거»를 보지 않는다. 글은 이 레포 안에서 끝나고 메타 레포의 결정에서
+# 나오지 않는다(ssccops ADR-0061). server·web에는 Docs 템플릿이 없어 같은 코드를 넣어도 동작이 같다.
 name: PR Guard
 
 # PR 제목·브랜치명·이슈 연결이 컨벤션을 지키는지 검사한다 (#244).
@@ -97,8 +99,9 @@ jobs:
           # ── 그 번호가 실재하는 이슈인가 ─────────────────────────────────────
           # 번호만 맞춰 적는 것을 막는다. 삭제된 이슈도 여기서 걸린다.
           NO="${TITLE_NO:-$BRANCH_NO}"
+          ISSUE_TITLE=""
           if [ -n "$NO" ]; then
-            if ! gh issue view "$NO" --repo "$REPO" --json number >/dev/null 2>&1; then
+            if ! ISSUE_TITLE=$(gh issue view "$NO" --repo "$REPO" --json title --jq .title 2>/dev/null); then
               fail "#${NO} 은 이 저장소에 없는 이슈입니다. 번호를 확인하거나 이슈를 먼저 여십시오."
             fi
           fi
@@ -106,7 +109,10 @@ jobs:
           # ── 본문 «근거»: ssccops#N 또는 ADR-NNNN ────────────────────────────
           # 템플릿의 `- 근거:` 줄이 아니어도 본문 어디든 그 패턴이 있으면 통과다 — 형식을
           # 맞추는 것이 아니라 «왜»가 어딘가 적혀 있는지를 보는 것이다.
-          if ! printf '%s' "$PR_BODY" | grep -qE '(SoongSilComputingClub/)?ssccops#[0-9]+|ADR-[0-9]{4}'; then
+          # 글 작업(`[DOCS]` 이슈)은 건너뛴다 — 맨 위 주석 참고.
+          if printf '%s' "$ISSUE_TITLE" | grep -qiE '^\[DOCS\]'; then
+            echo "ℹ️ #${NO} 은 글 작업([DOCS])이라 «근거»를 보지 않습니다."
+          elif ! printf '%s' "$PR_BODY" | grep -qE '(SoongSilComputingClub/)?ssccops#[0-9]+|ADR-[0-9]{4}'; then
             fail "PR 본문에 «근거»가 없습니다 — 메타 이슈 'SoongSilComputingClub/ssccops#N' 또는 'ADR-NNNN'을 적으십시오.
           배포 이력(deploy-history)이 PR에서 메타 이슈·ADR을 거슬러 올라가므로 여기 없으면 그 배포에 «왜»가 빠집니다."
           fi

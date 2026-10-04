@@ -10,8 +10,8 @@ body:
         제목 앞 `[DOCS]`를 **지우지 마세요.** 이 접두사로 브랜치(`chore/#번호`)와 라벨(`chore`)이 자동 생성됩니다.
         이슈 유형은 feat, fix, refactor, chore 네 가지뿐이라 글 작업은 chore로 묶이고, 커밋 타입은 `docs(blog):`처럼 씁니다.
 
-        생성 후 상단 **Parent issue**에서 `ssccops`의 Story나 Task를 연결하세요 (cross-repo 가능).
-        Epic에 닿지 않는 이슈는 어디에도 잡히지 않습니다.
+        **글 작업은 이 레포 안에서 끝납니다.** 메타 레포(`ssccops`)의 부모 이슈를 잇지 않아도 되고,
+        PR 본문의 «근거»도 비워도 됩니다(ADR-0061).
 
         글 작성 규칙은 이 레포 `AGENTS.md`의 «글 작성 규칙» 절에 있습니다.
 
@@ -72,8 +72,9 @@ body:
     id: refs
     attributes:
       label: 🙋🏻 참고 자료
-      description: 상위 이슈, 글의 바탕이 되는 ADR이나 문서.
+      description: 글의 바탕이 되는 문서, 관련 글, 참고한 자료.
       placeholder: |
-        - 상위: SoongSilComputingClub/ssccops#525
+        - 관련 글: /blog/...
+        - 참고: 사용 설명서의 «행사 관리» 절
     validations:
       required: false

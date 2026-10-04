@@ -88,7 +88,7 @@ develop 커밋에 붙는 «Cloudflare Pages» 상태가 발행 결과다.
 ## 커밋, 브랜치, PR 컨벤션
 
 server, web과 같다. 워크플로(`issue-branch-creator`, `issue-labeler`, `pr-labeler`, `pr-guard`)를 web에서 그대로
-옮겨 왔으니, 규칙을 바꿀 때는 세 레포를 함께 고친다.
+옮겨 왔으니, 규칙을 바꿀 때는 세 레포를 함께 고친다. 다른 점은 아래 «글 작업» 하나다.
 
 - **이슈는 Sub-task 템플릿 다섯 가지로 연다.**
 
@@ -102,9 +102,11 @@ server, web과 같다. 워크플로(`issue-branch-creator`, `issue-labeler`, `pr
 
   이슈 유형은 세 레포 모두 feat, fix, refactor, chore 넷뿐이라 글 작업도 `chore`로 묶인다. 이 레포만 `docs` 유형이나
   라벨을 따로 두지 않는다. 글 작업만 보고 싶으면 제목으로 거른다(`is:issue "[DOCS]" in:title`).
-  상위 이슈(Story, Task)는 메타 레포에 두고 Parent로 잇는다
+- **사이트 기능과 구조 작업**(문서 묶음 열기, 댓글, 검색, 설정)은 상위 이슈(Story, Task)를 메타 레포에 두고 Parent로 잇는다
+- **글 작업(`[DOCS]`)은 이 레포 안에서 끝난다**(ssccops ADR-0061). 메타 레포의 부모 이슈를 잇지 않고, PR 본문의
+  «근거»도 비워 둔다. `pr-guard`가 이슈 제목이 `[DOCS]`로 시작하면 근거를 보지 않는다
 - **PR 제목은 `[#이슈번호] 총 작업 내용`이고 develop에 squash merge한다.** 이 제목이 그대로 커밋 제목이 된다.
-  본문에 근거(`SoongSilComputingClub/ssccops#N` 또는 `ADR-NNNN`)가 없으면 `pr-guard`가 막는다
+  글 작업이 아니면 본문에 근거(`SoongSilComputingClub/ssccops#N` 또는 `ADR-NNNN`)가 있어야 하고, 없으면 `pr-guard`가 막는다
 - **커밋은 `type(scope): 설명`으로 쓴다.** 타입은 `feat`, `fix`, `refactor`, `design`, `style`, `docs`, `test`, `chore`,
   `init`, `rename`, `remove`, `cicd`이다. 글이면 `docs(blog): …`처럼 쓴다
 - **설명은 평범한 문장 한 줄로 쓴다.** 긴 대시(—)로 부제를 달거나 가운뎃점(·)으로 명사를 늘어놓지 않고, 쉼표와 조사로 잇는다.
