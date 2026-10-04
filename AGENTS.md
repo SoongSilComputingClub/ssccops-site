@@ -28,6 +28,8 @@ PR 템플릿과 📝 Docs 이슈 템플릿의 «공개 경계» 체크박스가 
 ## 구조
 
 ```
+guide/                사용 설명서 (/guide). index.md가 첫 페이지
+sidebars.ts           사용 설명서 목차 (폴더와 sidebar_position으로 자동)
 blog/                 글 (파일 하나가 글 하나), authors.yml
 src/pages/index.tsx   랜딩
 src/css/custom.css    전역 스타일 (한국어 어절 단위 줄바꿈)
@@ -35,11 +37,11 @@ static/               파비콘, 아이콘
 docusaurus.config.ts  사이트 설정
 ```
 
-**사용 설명서는 아직 이 레포에 없다.** 원본은 메타 레포 `docs/user-guide/`의 HTML 한 장이고 `guide.sscc-ssu.com`으로
-나간다. 이 사이트는 그 주소로 링크만 건다(`docusaurus.config.ts`의 `GUIDE_URL`). HTML을 통째로 복사하지 않는다.
-그 파일은 그대로 쓸 것이 아니라 한 절씩 해체해 문서 페이지로 옮길 재료이고, 사본을 두면 원본과 두 벌이 된다.
-옮기기 시작할 때 docs 플러그인을 켜고 `routeBasePath: 'guide'`로 둔다. 다 옮기면 `guide.sscc-ssu.com`을 `/guide/`로
-리다이렉트하고 메타 쪽을 지운다(ADR-0054 추신). 지금 초점은 블로그다.
+**사용 설명서는 `/guide`에 새로 쓰는 중이다**(ssccops ADR-0061). 운영진이 지금 쓰는 설명서는 메타 레포
+`docs/user-guide/`의 HTML 한 장이고 `guide.sscc-ssu.com`으로 나간다. 그 HTML은 옮기지 않고 재료로만 쓴다.
+새 설명서는 역할별 할 일 기준으로 한 페이지에 할 일 하나를 쓰고, 버전 딱지(`v0.2.x`에서 생김)는 본문에 두지 않는다.
+**옛 주소는 `guide/index.md` 한 곳에서만 안내한다.** 메뉴, 랜딩, 푸터는 `/guide`를 가리킨다. 새 설명서가 옛 내용을
+다 덮으면 `guide.sscc-ssu.com`을 `/guide`로 리다이렉트하고, 메타 쪽 HTML과 `guide/index.md`의 안내를 지운다.
 
 ## 명령
 

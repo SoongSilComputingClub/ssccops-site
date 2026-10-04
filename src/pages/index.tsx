@@ -9,7 +9,6 @@ import styles from './index.module.css';
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
-  const {guideUrl} = siteConfig.customFields as {guideUrl: string};
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
@@ -18,7 +17,7 @@ function HomepageHeader() {
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
-          <Link className="button button--secondary button--lg" href={guideUrl}>
+          <Link className="button button--secondary button--lg" to="/guide">
             사용 설명서
           </Link>
           <Link className="button button--outline button--secondary button--lg" to="/blog">
