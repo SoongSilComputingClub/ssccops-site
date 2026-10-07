@@ -36,7 +36,7 @@ blog/                 글 (파일 하나가 글 하나), authors.yml
 releases/             릴리스 노트 (/releases). 두 번째 블로그, _template.md가 틀
 src/pages/index.tsx   랜딩
 src/theme/BlogPostItem/  블로그 글 아래 giscus 댓글
-src/css/custom.css    전역 스타일 (Pretendard 글꼴, 한국어 어절 단위 줄바꿈)
+src/css/custom.css    전역 스타일 (사이트 색, Pretendard 글꼴, 한국어 어절 단위 줄바꿈)
 plugins/og-image/     링크 공유 카드(OG 이미지)를 빌드 때 굽는다. fonts/에 Pretendard OTF 두 벌과 OFL
 i18n/ko/code.json     화면 문구 번역 (검색 플러그인에 한국어가 없어 여기서 채운다)
 static/               파비콘, 아이콘
@@ -52,6 +52,10 @@ docusaurus.config.ts  사이트 설정
 **개발 참여(`/contributing`)는 처음 온 개발자가 읽는 순서로 풀어 쓴 안내다**(ssccops ADR-0061). 로컬 실행 방법과 개발 규칙의
 원본은 server와 web의 README와 `AGENTS.md`이니 옮겨 적지 않고 링크한다. 서버 구성, 내부 주소, 배포, 장애 대응 같은 운영 내용은
 공개하지 않고 «운영진에게 받는다»라고만 쓴다.
+
+**사이트 색은 임시다.** SSCCOps 제품(ssccops-web)이 쓰는 파랑을 따르는데, 제품의 디자인 토큰이 아직 확정되지 않았다.
+동아리 디자인 시스템이 정해지면 `src/css/custom.css` 맨 위의 색 블록(라이트, 다크 둘)만 바꾼다. 링크 글자는 흰 바탕 대비
+4.5:1을 넘는 값을 고른다.
 
 ## 명령
 

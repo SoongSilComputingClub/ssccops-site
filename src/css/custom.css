@@ -4,19 +4,26 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
+/*
+ * 사이트 색. SSCCOps 제품(ssccops-web의 admin·lms·www globals.css)이 쓰는 파랑을 따른다.
+ * 제품의 디자인 토큰이 아직 확정되지 않았으므로 이 값도 임시다. 동아리 디자인 시스템이 정해지면
+ * 이 블록과 아래 다크 모드 블록의 값만 바꾼다. 라이트는 #3182F6이 흰 바탕 글자 대비 3.71:1이라
+ * 한 단계 진한 #1B64DA(5.41:1)를 기본으로 쓴다. 다크는 #4C8FF8(#1B1B1D 위 5.4:1).
+ */
 :root {
   --ifm-font-family-base: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto,
     'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #1b64da;
+  --ifm-color-primary-dark: #185ac4;
+  --ifm-color-primary-darker: #1755b9;
+  --ifm-color-primary-darkest: #134699;
+  --ifm-color-primary-light: #2b72e5;
+  --ifm-color-primary-lighter: #377ae6;
+  --ifm-color-primary-lightest: #5a91eb;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --site-hero-background: #f2f4f6;
+  --site-button-border: #d1d6db;
 }
 
 /*
@@ -36,14 +43,15 @@ table {
   overflow-wrap: normal;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: #4c8ff8;
+  --ifm-color-primary-dark: #2d7bf7;
+  --ifm-color-primary-darker: #1d72f6;
+  --ifm-color-primary-darkest: #095ada;
+  --ifm-color-primary-light: #5e9af9;
+  --ifm-color-primary-lighter: #67a0f9;
+  --ifm-color-primary-lightest: #82b1fa;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --site-hero-background: #242526;
+  --site-button-border: #4a4b4d;
 }

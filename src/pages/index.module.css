@@ -4,6 +4,9 @@
  */
 
 .heroBanner {
+  /* 밝은 바탕에 진한 글자. 색 바탕(hero--primary)이면 보조 버튼 글자가 바탕에 묻혔다. */
+  background: var(--site-hero-background);
+  color: var(--ifm-heading-color);
   padding: 4rem 0;
   text-align: center;
   position: relative;
@@ -14,6 +17,13 @@
   .heroBanner {
     padding: 2rem;
   }
+}
+
+/* 보조 버튼은 바탕과 구분되게 페이지 바탕색을 깔고 테두리를 또렷하게 둔다(www의 «소개» 버튼과 같은 모양). */
+.buttons :global(.button--outline) {
+  background: var(--ifm-background-color);
+  border-color: var(--site-button-border);
+  color: var(--ifm-font-color-base);
 }
 
 .buttons {
