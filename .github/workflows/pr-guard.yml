@@ -43,7 +43,7 @@ jobs:
   guard:
     runs-on: ubuntu-latest
 
-    # develop -> main 릴리스 PR은 이슈 번호가 없는 것이 정상이다. dependabot도 제 이름으로
+    # develop -> main 릴리즈 PR은 이슈 번호가 없는 것이 정상이다. dependabot도 제 이름으로
     # 브랜치를 만들므로 규칙을 적용할 수 없다.
     if: >-
       github.event.pull_request.head.ref != 'develop' &&

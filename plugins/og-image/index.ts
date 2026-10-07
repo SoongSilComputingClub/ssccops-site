@@ -10,7 +10,7 @@ import type {LoadContext, Plugin} from '@docusaurus/types';
  * - 사이트 카드 `img/social-card.png` 한 장과, 블로그 글마다 `img/og/<글 주소>.png` 한 장.
  * - 글 HTML의 og:image·twitter:image를 사이트 카드에서 그 글의 카드로 바꿔 쓴다. 글 frontmatter에
  *   `image`를 직접 적었으면 그 값이 이미 들어가 있으므로 건드리지 않는다.
- * - 블로그 인스턴스마다 돈다. 릴리스 노트(/releases)를 두 번째 블로그로 열면 그 글도 카드가 생긴다.
+ * - 블로그 인스턴스마다 돈다. 릴리즈 노트(/releases)를 두 번째 블로그로 열면 그 글도 카드가 생긴다.
  * - 요청 때 그리지 않는 이유: 정적 사이트라 요청마다 도는 코드가 없고, Workers 무료 플랜은 요청당 CPU 10ms라
  *   렌더링이 들어가지 않는다.
  * - 글꼴은 옆 `fonts/`의 Pretendard 1.3.9 OTF 두 벌(Regular, Bold)이다. satori는 woff2를 읽지 못한다.
