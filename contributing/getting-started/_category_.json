@@ -1,0 +1,8 @@
+{
+  "label": "시작하기",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "description": "SSCCOps가 무엇이고, 요청 하나가 어떻게 흐르며, 로컬에서 어떻게 띄우는지 다룹니다."
+  }
+}

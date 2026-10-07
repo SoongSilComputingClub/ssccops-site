@@ -1,0 +1,8 @@
+{
+  "label": "웹",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "ssccops-web(Next.js 모노레포)의 구조, FSD, 서버 API를 부르는 법을 다룹니다."
+  }
+}

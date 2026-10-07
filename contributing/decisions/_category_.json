@@ -1,0 +1,8 @@
+{
+  "label": "왜 이렇게 만들었나",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "코드를 이해하는 데 필요한 결정의 요지를 다룹니다."
+  }
+}
