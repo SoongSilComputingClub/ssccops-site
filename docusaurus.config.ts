@@ -114,6 +114,30 @@ const config: Config = {
         editUrl: `https://github.com/${REPO}/edit/develop/`,
       },
     ],
+    // 릴리스 노트(/releases). 운영진과 회원이 읽는 버전별 안내라 기술 블로그와 목록, RSS를 따로 둔다(ssccops ADR-0061).
+    // 댓글은 붙지 않는다(src/theme/BlogPostItem이 기본 블로그에만 그린다).
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        id: 'releases',
+        path: 'releases',
+        routeBasePath: 'releases',
+        authorsMapPath: '../blog/authors.yml',
+        blogTitle: '릴리스 노트',
+        blogDescription: 'SSCCOps 버전마다 달라진 것과 해 주실 일',
+        blogSidebarTitle: '모든 릴리스',
+        blogSidebarCount: 'ALL',
+        showReadingTime: false,
+        feedOptions: {
+          type: ['rss', 'atom'],
+          xslt: true,
+        },
+        editUrl: `https://github.com/${REPO}/edit/develop/`,
+        onInlineTags: 'warn',
+        onInlineAuthors: 'throw',
+        onUntruncatedBlogPosts: 'ignore',
+      },
+    ],
   ],
 
   themeConfig: {
@@ -126,6 +150,7 @@ const config: Config = {
       title: 'SSCCOps',
       items: [
         {type: 'docSidebar', sidebarId: 'guideSidebar', label: '사용 설명서', position: 'left'},
+        {to: '/releases', label: '릴리스 노트', position: 'left'},
         {to: '/blog', label: '블로그', position: 'left'},
         {to: '/contributing', label: '개발 참여', position: 'right'},
         {href: `https://github.com/${REPO}`, label: 'GitHub', position: 'right'},
@@ -138,6 +163,7 @@ const config: Config = {
           title: 'SSCCOps',
           items: [
             {label: '사용 설명서', to: '/guide'},
+            {label: '릴리스 노트', to: '/releases'},
             {label: '블로그', to: '/blog'},
           ],
         },

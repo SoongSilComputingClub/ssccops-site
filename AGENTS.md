@@ -33,6 +33,7 @@ sidebars.ts           사용 설명서 목차 (폴더와 sidebar_position으로 
 contributing/         개발 참여 (/contributing). 두 번째 문서 묶음
 sidebarsContributing.ts  개발 참여 목차
 blog/                 글 (파일 하나가 글 하나), authors.yml
+releases/             릴리스 노트 (/releases). 두 번째 블로그, _template.md가 틀
 src/pages/index.tsx   랜딩
 src/theme/BlogPostItem/  블로그 글 아래 giscus 댓글
 src/css/custom.css    전역 스타일 (Pretendard 글꼴, 한국어 어절 단위 줄바꿈)
@@ -91,6 +92,16 @@ Node 버전은 `.nvmrc`(22), pnpm 버전은 `package.json`의 `packageManager`�
 
 링크를 공유할 때 보이는 카드(OG 이미지)는 제목, 날짜, 작성자로 빌드 때 저절로 만들어진다(`img/og/<글 주소>.png`,
 `plugins/og-image/`). 직접 만든 그림을 쓰려면 frontmatter에 `image`를 적는다.
+
+## 릴리스 노트
+
+`/releases`는 운영진과 회원이 읽는 버전별 안내다(ssccops ADR-0061). 기술 블로그와 목록, RSS가 따로 있고 댓글은 없다.
+
+- **릴리스마다 글 하나.** `releases/_template.md`를 복사해 `v0-2-18.md`처럼 버전의 점을 하이픈으로 바꾼 이름으로 쓴다
+- **`date`는 릴리스한 날이다.** 태그를 찍기 전에는 `draft: true`로 두고, 태그를 찍은 뒤 지운다. develop 머지가 곧 발행이다
+- **기술 용어 없이 «달라진 것»과 «해 주실 일»만 쓴다.** 자세한 사용법은 사용 설명서 페이지로 링크한다
+- 카카오톡 공지는 요약 몇 줄과 이 글의 링크로 줄인다. 같은 내용을 두 벌 쓰지 않는다
+- 작성자는 적지 않아도 된다. 적으면 `blog/authors.yml`에 있는 GitHub ID만 받는다
 
 ## 댓글
 
