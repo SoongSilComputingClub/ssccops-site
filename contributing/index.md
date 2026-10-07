@@ -2,33 +2,27 @@
 title: 개발 참여
 description: SSCCOps 개발에 처음 참여하는 사람을 위한 안내입니다.
 slug: /
-sidebar_position: 1
+sidebar_position: 0
 ---
 
 # 개발 참여
 
-SSCCOps는 레포 셋으로 나뉘어 있고, 코드는 모두 공개입니다.
+SSCCOps에 처음 참여하는 개발자를 위한 문서입니다. 코드를 열기 전에 전체 그림을 잡고, 첫 PR을 낼 때까지 막히지 않게 돕는 것이 목적입니다.
 
-| 레포 | 무엇 | 기술 |
-|---|---|---|
-| [ssccops-server](https://github.com/SoongSilComputingClub/ssccops-server) | API 서버. 업무, 회원과 권한, 폼, 학술 프로그램, 행사, 콘텐츠, 알림을 맡습니다 | Spring Boot 3.5, Java 17, PostgreSQL |
-| [ssccops-web](https://github.com/SoongSilComputingClub/ssccops-web) | 웹 앱 셋. 운영진용 어드민(admin), 공개 사이트(www), 학술 앱(lms) | Next.js 16, React 19, pnpm 모노레포 |
-| [ssccops-site](https://github.com/SoongSilComputingClub/ssccops-site) | 이 사이트. 사용 설명서와 블로그 | Docusaurus |
+세부 규칙의 원본은 각 레포의 `AGENTS.md`와 `README.md`입니다. 이 문서들은 규칙을 다시 옮겨 적지 않고, 읽는 순서와 이유를 풀어 준 뒤 원본으로 안내합니다.
 
 ## 처음 읽는 순서
 
-1. **서버를 띄웁니다.** [ssccops-server README](https://github.com/SoongSilComputingClub/ssccops-server#readme)의 «빠른 시작»을 따릅니다.
-2. **웹을 띄웁니다.** [ssccops-web README](https://github.com/SoongSilComputingClub/ssccops-web#readme)의 «빠른 시작»을 따릅니다. 웹은 서버가 떠 있어야 화면에 데이터가 나옵니다.
-3. **고치려는 레포의 `AGENTS.md`를 읽습니다.** 개발 규칙의 원본이고, 서버는 도메인마다, 웹은 앱과 패키지마다 따로 있습니다.
+| 차례 | 읽을 것 | 언제 |
+|---|---|---|
+| 1 | [SSCCOps 한눈에 보기](getting-started/overview.md), [로컬 개발 환경](getting-started/local-setup.md) | 가장 먼저 |
+| 2 | [요청 하나 따라가기](getting-started/request-flow.md) | 서버와 웹이 어디서 만나는지 볼 때 |
+| 3 | [일하는 흐름](contribute/workflow.md), [커밋, 브랜치, PR 규칙](contribute/commit-branch-pr.md), [CI가 검사하는 것](contribute/ci.md) | 첫 PR을 내기 전 |
+| 4 | 서버: [서버 구조](server/structure.md), [API 약속](server/api-contract.md), [데이터베이스와 스키마 변경](server/database.md) | 서버 코드를 고칠 때 |
+| 4 | 웹: [웹 구조](web/structure.md), [FSD와 슬라이스](web/fsd.md), [서버와 이야기하는 법](web/talking-to-server.md) | 웹 코드를 고칠 때 |
 
-로컬 실행에 필요한 접속 정보(Supabase 프로젝트 값 같은 것)는 운영진에게 받습니다. 이 사이트와 레포에는 적지 않습니다.
+«작성 필요» 표시가 있는 문서는 아직 쓰지 않은 자리입니다. 담을 내용만 정해 두었습니다.
 
-## 작업 흐름
+## 공개하지 않는 것
 
-세 레포가 같은 흐름을 씁니다.
-
-1. **이슈를 엽니다.** 제목 앞의 `[FEAT]`, `[FIX]`, `[REFACTOR]`, `[CHORE]`에 따라 봇이 `feat/#번호` 같은 브랜치를 만들어 줍니다.
-2. **그 브랜치에서 작업하고 PR을 엽니다.** PR 제목은 `[#번호] 무엇을 했는지`로 씁니다.
-3. **`develop`에 squash merge합니다.** `main`은 릴리즈에만 씁니다.
-
-커밋 형식과 PR 검사 같은 세부 규칙은 각 레포의 `AGENTS.md`에 있습니다.
+이 사이트는 누구나 읽습니다. 서버 구성, 배포 설정, 비밀값, 장애 대응 같은 운영 내용은 여기 쓰지 않습니다. 로컬 실행에 필요한 접속 정보는 운영진에게 받습니다.

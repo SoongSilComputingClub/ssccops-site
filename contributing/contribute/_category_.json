@@ -1,0 +1,8 @@
+{
+  "label": "기여하기",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "이슈에서 머지까지, 규칙과 CI."
+  }
+}
