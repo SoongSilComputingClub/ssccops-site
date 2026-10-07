@@ -142,6 +142,7 @@ server, web과 같다. 워크플로(`issue-branch-creator`, `issue-labeler`, `pr
 - **사이트 기능과 구조 작업**(문서 묶음 열기, 댓글, 검색, 설정)은 상위 이슈(Story, Task)를 메타 레포에 두고 Parent로 잇는다
 - **글 작업(`[DOCS]`)은 이 레포 안에서 끝난다**(ssccops ADR-0061). 메타 레포의 부모 이슈를 잇지 않고, PR 본문의
   «근거»도 비워 둔다. `pr-guard`가 이슈 제목이 `[DOCS]`로 시작하면 근거를 보지 않는다
+- **리뷰는 `.github/CODEOWNERS`의 두 사람(@swthewhite, @bell-person-ii)에게 자동으로 요청된다.** 머지 조건으로 강제하지는 않는다
 - **PR 제목은 `[#이슈번호] 총 작업 내용`이고 develop에 squash merge한다.** 이 제목이 그대로 커밋 제목이 된다.
   글 작업이 아니면 본문에 근거(`SoongSilComputingClub/ssccops#N` 또는 `ADR-NNNN`)가 있어야 하고, 없으면 `pr-guard`가 막는다
 - **커밋은 `type(scope): 설명`으로 쓴다.** 타입은 `feat`, `fix`, `refactor`, `design`, `style`, `docs`, `test`, `chore`,

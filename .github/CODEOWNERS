@@ -1,0 +1,7 @@
+# 이 레포의 담당
+#
+# PR을 열면 두 사람에게 리뷰 요청이 자동으로 간다. 머지 조건으로 강제하지는 않는다. 브랜치 보호에
+# «Require review from Code Owners»를 켜지 않았다(ssccops-server의 CODEOWNERS와 같은 방식).
+# 사이트는 글과 설정이 섞여 있어 경로별로 나누지 않고 모든 파일을 두 사람이 함께 본다.
+
+*  @swthewhite @bell-person-ii
