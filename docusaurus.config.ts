@@ -29,6 +29,17 @@ const config: Config = {
 
   onBrokenLinks: 'throw',
 
+  customFields: {
+    // giscus 댓글(블로그 글에만). repoId와 categoryId는 https://giscus.app 에 이 레포를 넣으면 나온다.
+    // 비밀값이 아니고 페이지에 그대로 실린다. 비어 있으면 댓글 영역을 그리지 않는다.
+    giscus: {
+      repo: REPO,
+      repoId: 'R_kgDOUsvIDA',
+      category: 'Blog Comments',
+      categoryId: 'DIC_kwDOUsvIDM4DHBYK',
+    },
+  },
+
   markdown: {
     // `.md`는 CommonMark(GFM)로, `.mdx`만 MDX로 읽는다. 기본값(전부 MDX)이면 본문의 `{`·`<`가
     // 코드로 해석돼 평범한 글이 빌드를 깬다 — 글은 순수 GFM으로 쓴다는 규칙(ADR-0054 규칙 1)과 같은 선택이다.

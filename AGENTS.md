@@ -32,6 +32,7 @@ guide/                사용 설명서 (/guide). index.md가 첫 페이지
 sidebars.ts           사용 설명서 목차 (폴더와 sidebar_position으로 자동)
 blog/                 글 (파일 하나가 글 하나), authors.yml
 src/pages/index.tsx   랜딩
+src/theme/BlogPostItem/  블로그 글 아래 giscus 댓글
 src/css/custom.css    전역 스타일 (한국어 어절 단위 줄바꿈)
 static/               파비콘, 아이콘
 docusaurus.config.ts  사이트 설정
@@ -80,6 +81,14 @@ Node 버전은 `.nvmrc`(22), pnpm 버전은 `package.json`의 `packageManager`�
    등록되지 않은 작성자를 글에 쓰면 빌드가 멈춘다
 6. 요약 뒤에 `<!-- truncate -->`를 둔다. 목록에는 그 위까지만 나온다
 7. **아직 공개하면 안 되는 글은 `draft: true`로 둔다.** develop 머지가 곧 발행이고, 초안은 프로덕션 빌드에서 빠진다
+
+## 댓글
+
+블로그 글 상세에만 giscus 댓글이 붙는다. 설명서와 글 목록에는 없다. 댓글은 이 레포의 Discussions `Blog Comments`
+카테고리에 글 경로(pathname)로 쌓인다. 그래서 게시한 글의 파일 이름을 바꾸면 댓글이 떨어진다.
+`docusaurus.config.ts`의 `customFields.giscus`에 있는 `repoId`와 `categoryId`는 비밀값이 아니고 페이지에 그대로 실린다.
+값이 비면 댓글 영역을 그리지 않는다. giscus 앱은 조직에 «선택한 레포만»으로 설치되어 있어, 레포를 새로 만들면
+앱 권한에 다시 넣어야 한다.
 
 ## 배포
 
