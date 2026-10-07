@@ -100,7 +100,12 @@ const config: Config = {
     ],
   ],
 
+  // 링크 공유용 카드를 빌드 때 굽는다(plugins/og-image). 사이트 카드 한 장과 블로그 글마다 한 장.
+  plugins: ['./plugins/og-image/index.ts'],
+
   themeConfig: {
+    // 사이트 카드. 파일은 plugins/og-image가 빌드 때 만든다.
+    image: 'img/social-card.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },

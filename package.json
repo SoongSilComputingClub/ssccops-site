@@ -30,7 +30,9 @@
     "@docusaurus/module-type-aliases": "3.10.2",
     "@docusaurus/tsconfig": "3.10.2",
     "@docusaurus/types": "3.10.2",
+    "@resvg/resvg-js": "2.6.2",
     "@types/react": "^19.0.0",
+    "satori": "0.35.1",
     "typescript": "~6.0.2"
   },
   "browserslist": {

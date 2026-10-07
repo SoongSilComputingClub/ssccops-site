@@ -33,7 +33,8 @@ sidebars.ts           사용 설명서 목차 (폴더와 sidebar_position으로 
 blog/                 글 (파일 하나가 글 하나), authors.yml
 src/pages/index.tsx   랜딩
 src/theme/BlogPostItem/  블로그 글 아래 giscus 댓글
-src/css/custom.css    전역 스타일 (한국어 어절 단위 줄바꿈)
+src/css/custom.css    전역 스타일 (Pretendard 글꼴, 한국어 어절 단위 줄바꿈)
+plugins/og-image/     링크 공유 카드(OG 이미지)를 빌드 때 굽는다. fonts/에 Pretendard OTF 두 벌과 OFL
 static/               파비콘, 아이콘
 docusaurus.config.ts  사이트 설정
 ```
@@ -81,6 +82,9 @@ Node 버전은 `.nvmrc`(22), pnpm 버전은 `package.json`의 `packageManager`�
    등록되지 않은 작성자를 글에 쓰면 빌드가 멈춘다
 6. 요약 뒤에 `<!-- truncate -->`를 둔다. 목록에는 그 위까지만 나온다
 7. **아직 공개하면 안 되는 글은 `draft: true`로 둔다.** develop 머지가 곧 발행이고, 초안은 프로덕션 빌드에서 빠진다
+
+링크를 공유할 때 보이는 카드(OG 이미지)는 제목, 날짜, 작성자로 빌드 때 저절로 만들어진다(`img/og/<글 주소>.png`,
+`plugins/og-image/`). 직접 만든 그림을 쓰려면 frontmatter에 `image`를 적는다.
 
 ## 댓글
 
