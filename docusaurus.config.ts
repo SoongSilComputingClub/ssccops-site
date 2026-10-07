@@ -140,6 +140,27 @@ const config: Config = {
     ],
   ],
 
+  // 사이트 검색. 빌드 때 색인을 만들어 브라우저에서 찾는다(외부 서비스 없음). lunr의 한국어 모듈(lunr.ko)로
+  // 조사가 붙은 말(«행사를»)과 합성어 안의 말(«참가신청서»의 «참가»)까지 찾는다. 대상은 문서 묶음 둘과 블로그 둘.
+  // 화면 문구는 이 플러그인에 한국어가 없어 i18n/ko/code.json에서 번역한다.
+  themes: [
+    [
+      '@easyops-cn/docusaurus-search-local',
+      {
+        hashed: true,
+        language: ['en', 'ko'],
+        docsDir: ['guide', 'contributing'],
+        docsRouteBasePath: ['guide', 'contributing'],
+        blogDir: ['blog', 'releases'],
+        blogRouteBasePath: ['blog', 'releases'],
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+        // 기본값 1이면 두 글자 낱말에서 한 글자만 같아도 걸린다(«참가»로 «참여»가 나온다). 한국어에서는 끈다.
+        fuzzyMatchingDistance: 0,
+      },
+    ],
+  ],
+
   themeConfig: {
     // 사이트 카드. 파일은 plugins/og-image가 빌드 때 만든다.
     image: 'img/social-card.png',

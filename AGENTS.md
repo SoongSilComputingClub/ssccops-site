@@ -38,6 +38,7 @@ src/pages/index.tsx   랜딩
 src/theme/BlogPostItem/  블로그 글 아래 giscus 댓글
 src/css/custom.css    전역 스타일 (Pretendard 글꼴, 한국어 어절 단위 줄바꿈)
 plugins/og-image/     링크 공유 카드(OG 이미지)를 빌드 때 굽는다. fonts/에 Pretendard OTF 두 벌과 OFL
+i18n/ko/code.json     화면 문구 번역 (검색 플러그인에 한국어가 없어 여기서 채운다)
 static/               파비콘, 아이콘
 docusaurus.config.ts  사이트 설정
 ```

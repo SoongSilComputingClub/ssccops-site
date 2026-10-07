@@ -1,0 +1,33 @@
+{
+  "theme.SearchBar.label": {
+    "message": "검색",
+    "description": "검색창 이름(@easyops-cn/docusaurus-search-local). 이 플러그인은 한국어 번역을 갖고 있지 않다"
+  },
+  "theme.SearchBar.noResultsText": {
+    "message": "찾은 결과가 없습니다"
+  },
+  "theme.SearchBar.seeAll": {
+    "message": "결과 모두 보기"
+  },
+  "theme.SearchBar.searchInContext": {
+    "message": "«{context}» 안에서 모두 보기"
+  },
+  "theme.SearchBar.seeAllOutsideContext": {
+    "message": "«{context}» 밖의 결과 모두 보기"
+  },
+  "theme.SearchPage.emptyResultsTitle": {
+    "message": "사이트 검색"
+  },
+  "theme.SearchPage.existingResultsTitle": {
+    "message": "«{query}» 검색 결과"
+  },
+  "theme.SearchPage.documentsFound.plurals": {
+    "message": "{count}개 문서를 찾았습니다"
+  },
+  "theme.SearchPage.noResultsText": {
+    "message": "찾은 문서가 없습니다"
+  },
+  "theme.SearchPage.searchContext.everywhere": {
+    "message": "전체"
+  }
+}
