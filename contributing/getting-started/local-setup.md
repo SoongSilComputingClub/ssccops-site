@@ -11,7 +11,7 @@ sidebar_position: 3
 - 서버: [ssccops-server README «빠른 시작»](https://github.com/SoongSilComputingClub/ssccops-server#readme)
 - 웹: [ssccops-web README «빠른 시작»](https://github.com/SoongSilComputingClub/ssccops-web#readme)
 
-## 필요한 것
+## 시작하기 전에
 
 | 도구 | 버전 | 근거 |
 |---|---|---|
@@ -23,11 +23,13 @@ sidebar_position: 3
 
 웹 레포에는 `.nvmrc`가 없습니다. Node 버전은 위의 README와 CI 값을 따릅니다.
 
-서버 레포의 `.husky/pre-commit` 훅은 `develop`, `main` 브랜치에서의 직접 커밋을 막은 뒤 `pnpm exec lint-staged`를 부르고, lint-staged는 커밋에 Java 파일이 있으면 `./gradlew spotlessApply checkstyleMain checkstyleTest`를 돌립니다(`.lintstagedrc`). 그래서 이 훅을 쓰려면 서버 작업에도 pnpm이 필요합니다. 다만 서버 레포에는 `package.json`이 없어, 훅을 어떻게 켜고 lint-staged를 어디서 받는지는 `[확인 필요]`입니다.
+서버 레포의 `.husky/pre-commit` 훅은 `develop`, `main` 브랜치에서의 직접 커밋을 막은 뒤 `pnpm exec lint-staged`를 부르고, lint-staged는 커밋에 Java 파일이 있으면 `./gradlew spotlessApply checkstyleMain checkstyleTest`를 돌립니다(`.lintstagedrc`). 그래서 이 훅을 쓰려면 서버 작업에도 pnpm이 필요합니다.
+
+다만 서버 레포에는 `package.json`이 없어, 훅을 어떻게 켜고 lint-staged를 어디서 받는지는 `[확인 필요]`입니다.
 
 ## 접속 정보는 운영진에게 받습니다
 
-서버와 웹 모두 **Supabase 프로젝트 값**이 있어야 로그인과 토큰 검증이 됩니다. 서버의 `SUPABASE_URL`과 웹 세 앱의 `NEXT_PUBLIC_SUPABASE_URL`은 **모두 같은 프로젝트**를 가리켜야 합니다. 같은 계정으로 로그인한 사람이 서버에서 같은 회원으로 식별되어야 하기 때문입니다.
+서버와 웹 모두 Supabase 프로젝트 값이 있어야 로그인과 토큰 검증이 됩니다. 서버의 `SUPABASE_URL`과 웹 세 앱의 `NEXT_PUBLIC_SUPABASE_URL`은 **모두 같은 프로젝트**를 가리켜야 합니다. 같은 계정으로 로그인한 사람이 서버에서 같은 회원으로 식별되어야 하기 때문입니다.
 
 이 값들은 레포에도 이 사이트에도 적지 않습니다. **값은 운영진에게 받습니다.** 개인이 Supabase 프로젝트를 따로 만들어 써도 되는지는 `[확인 필요]`입니다.
 
@@ -60,7 +62,7 @@ curl http://localhost:8080/actuator/health/readiness
 
 API 문서는 `local`과 `dev` 프로필에서 `http://localhost:8080/swagger-ui.html`로 열립니다.
 
-### 빈 DB에서 처음 가입한 사람이 최고관리자가 됩니다
+### 첫 가입자는 최고관리자
 
 권한 관리 화면은 `ROLE_MANAGE` 권한을 요구하므로, 새 환경에서는 아무도 역할을 줄 수 없는 닫힌 고리가 생깁니다. 그래서 **회원 테이블이 비어 있을 때 가입하는 첫 회원에게 `최고관리자` 역할(권한 트리의 최상위 `SUPER`)을 자동으로 줍니다.** 판정 기준은 «회원이 한 명도 없는가» 하나입니다.
 
@@ -132,7 +134,7 @@ pnpm --filter @ssccops/www dev
 
 ## 검사 명령
 
-PR을 올리기 전에 CI와 같은 검사를 로컬에서 먼저 돌립니다. 자세한 것은 [CI가 검사하는 것](../contribute/ci.md)에서 다룹니다.
+PR을 올리기 전에 CI와 같은 검사를 로컬에서 먼저 돌립니다. 자세한 것은 [CI 검사](../contribute/ci.md)에서 다룹니다.
 
 ```bash
 # 서버
@@ -150,4 +152,4 @@ pnpm build
 ## 다음 읽을 것
 
 - [요청 하나 따라가기](./request-flow.md): 띄운 서버와 www로 행사 신청 흐름을 직접 따라가 봅니다.
-- [일하는 흐름: 이슈에서 머지까지](../contribute/workflow.md)
+- [이슈에서 머지까지](../contribute/workflow.md): 환경이 준비되면 이슈를 열고 첫 PR을 올리는 흐름을 봅니다.

@@ -1,10 +1,10 @@
 ---
-title: 서버 안의 부가 기능
+title: 서버 부가 기능
 description: 아직 쓰지 않은 문서입니다. 담을 내용만 정해 두었습니다.
 sidebar_position: 5
 ---
 
-# 서버 안의 부가 기능
+# 서버 부가 기능
 
 :::warning[작성 필요]
 

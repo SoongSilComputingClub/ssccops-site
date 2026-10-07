@@ -6,7 +6,9 @@ sidebar_position: 1
 
 # 서버 구조
 
-ssccops-server를 처음 열었을 때 어디에 무엇이 있는지 보여 주는 지도입니다. 규칙의 원본은 레포의 [`AGENTS.md`](https://github.com/SoongSilComputingClub/ssccops-server/blob/develop/AGENTS.md)이고, 이 문서는 그 «아키텍처» 절을 읽기 전에 볼 요지만 담습니다.
+ssccops-server를 처음 열었을 때 어디에 무엇이 있는지 보여 주는 지도입니다. 서버 코드를 고치기 전에 한 번 읽어 두면 됩니다.
+
+규칙의 원본은 레포의 [`AGENTS.md`](https://github.com/SoongSilComputingClub/ssccops-server/blob/develop/AGENTS.md)입니다. 이 문서는 그 «아키텍처», «도메인», «전역» 절을 읽기 전에 볼 요지만 담습니다.
 
 ## 기술 스택
 
@@ -47,9 +49,19 @@ src/main/java/org/sscc/ssccopsserver/
 | `crawler` | 검색 크롤러에게 내주는 `/robots.txt` |
 | `db` | DB 연결을 살려 두는 예약 작업 |
 
-### 도메인 안에서 계층을 반복합니다
+## 도메인 안에서 계층을 반복합니다
 
 도메인 폴더마다 같은 하위 폴더를 둡니다. 계층이 위에 있고 도메인이 아래에 있는 구조가 아니라, 도메인이 위에 있고 그 안에 계층이 반복되는 구조입니다.
+
+요청은 한 도메인 안에서 컨트롤러, 서비스, 리포지토리 순으로 내려갑니다. `example` 도메인으로 보면 다음과 같습니다.
+
+```mermaid
+flowchart LR
+  C["ExampleController"] --> S["ExampleService (인터페이스)"]
+  S -.구현.- SI["ExampleServiceImpl"]
+  SI --> R["ExampleRepository"]
+  R --> E["ExampleEntity"]
+```
 
 | 하위 폴더 | 담는 것 |
 |---|---|
@@ -87,7 +99,9 @@ src/main/java/org/sscc/ssccopsserver/
 
 ### 도메인끼리 순환하지 않습니다
 
-도메인 A가 B를 부르고 B가 다시 A를 부르는 순환을 만들지 않습니다. 이 규칙은 ArchUnit 테스트 [`DomainCycleTest`](https://github.com/SoongSilComputingClub/ssccops-server/blob/develop/src/test/java/org/sscc/ssccopsserver/DomainCycleTest.java)가 검사합니다. `domain.(*)` 바로 아래 폴더 하나를 슬라이스 하나로 보고 슬라이스 사이의 순환을 찾습니다. 별도 도구가 아니라 일반 테스트라서 `./gradlew test`와 CI에서 그대로 잡힙니다.
+도메인 A가 B를 부르고 B가 다시 A를 부르는 순환을 만들지 않습니다. 이 규칙은 ArchUnit 테스트 [`DomainCycleTest`](https://github.com/SoongSilComputingClub/ssccops-server/blob/develop/src/test/java/org/sscc/ssccopsserver/DomainCycleTest.java)가 검사합니다.
+
+이 테스트는 `domain.(*)` 바로 아래 폴더 하나를 슬라이스 하나로 보고 슬라이스 사이의 순환을 찾습니다. 별도 도구가 아니라 일반 테스트라서 `./gradlew test`와 CI에서 그대로 잡힙니다.
 
 한 방향 의존은 괜찮습니다. 예를 들어 여러 도메인이 `member`를 참조하는 것은 회원이 모든 기능에 등장하기 때문이고 결함이 아닙니다.
 
@@ -95,7 +109,21 @@ src/main/java/org/sscc/ssccopsserver/
 
 다른 도메인에 읽기 전용 질의를 해야 하는데 그쪽이 이미 이쪽을 참조하고 있다면, **묻는 쪽이 인터페이스를 선언하고 데이터를 가진 쪽이 구현**합니다. 공용 모듈을 새로 만들어 옮기지 않습니다. 그 모듈이 다음 순환의 자리가 되기 때문입니다.
 
-지금 코드에 있는 예는 다음과 같습니다.
+`member`와 `operation`의 예로 보면 화살표가 모두 한 방향(`operation`에서 `member`로)이라 순환이 생기지 않습니다. `member`는 담당 하위 업무 건수를 자기가 선언한 포트에만 묻고, 운영 도메인의 전용 빈이 그 포트를 구현합니다.
+
+```mermaid
+flowchart LR
+  subgraph member["domain/member"]
+    MS["MemberChangeServiceImpl"] --> P["MemberSubWorkLoadProvider (포트)"]
+  end
+  subgraph operation["domain/operation"]
+    IMPL["SubWorkOwnerLoadProvider"] --> SR["SubWorkRepository"]
+  end
+  IMPL -.구현.-> P
+  operation -->|참조| member
+```
+
+지금 코드에 있는 포트는 다음과 같습니다.
 
 | 포트 | 선언한 곳 |
 |---|---|
@@ -112,7 +140,7 @@ src/main/java/org/sscc/ssccopsserver/
 [`domain/example`](https://github.com/SoongSilComputingClub/ssccops-server/tree/develop/src/main/java/org/sscc/ssccopsserver/domain/example)은 위의 계층 한 벌을 보여 주는 템플릿입니다. `ExampleController`, `ExampleService`와 `ExampleServiceImpl`, `ExampleRepository`, `ExampleEntity`와 `ExampleStatus`, `ExampleCreateOrUpdateRequest`와 `ExampleReadResponse`, `ExampleErrorCode`가 들어 있습니다.
 
 - 새 도메인을 만들 때 이 폴더를 복사해서 이름을 바꿉니다.
-- `ExampleController`에는 `@Profile("local")`이 붙어 있어 dev와 prod에는 라우트가 없습니다. **복사한 뒤 이 한 줄은 지웁니다.** 템플릿을 배포에서 빼려는 줄이지 새 도메인이 따를 규칙이 아닙니다.
+- `ExampleController`에는 `@Profile("local")`이 붙어 있어 dev와 prod에는 라우트가 없습니다. 복사한 뒤 **이 한 줄은 지웁니다.** 템플릿을 배포에서 빼려는 줄이지 새 도메인이 따를 규칙이 아닙니다.
 - `example`에 기능을 더하지 않습니다.
 
 ## 이름 규칙
@@ -134,8 +162,8 @@ src/main/java/org/sscc/ssccopsserver/
 
 코드 스타일은 Naver 컨벤션을 바꾼 checkstyle 설정과 Spotless가 검사합니다. import 순서가 틀리면 손으로 고치지 말고 `./gradlew spotlessApply`를 돌립니다.
 
-## 더 읽을 곳
+## 다음 읽을 것
 
-- 루트 [`AGENTS.md`](https://github.com/SoongSilComputingClub/ssccops-server/blob/develop/AGENTS.md)의 «아키텍처», «도메인», «전역» 절
-- 위 표의 도메인별 `AGENTS.md`
-- 응답, 에러, 인증 약속은 [API 약속: 응답, 에러, 인증](./api-contract.md)
+- [API 약속](./api-contract.md): 컨트롤러가 지키는 응답 봉투, 에러 처리, 인증과 인가
+- [데이터베이스와 스키마 변경](./database.md): 엔티티를 고칠 때 함께 더하는 Flyway 마이그레이션
+- [요청 하나 따라가기](../getting-started/request-flow.md): 이 계층들을 요청 하나가 실제로 지나가는 길

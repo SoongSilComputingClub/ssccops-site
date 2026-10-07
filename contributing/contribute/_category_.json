@@ -3,6 +3,6 @@
   "position": 5,
   "link": {
     "type": "generated-index",
-    "description": "이슈에서 머지까지, 규칙과 CI."
+    "description": "이슈에서 머지까지의 흐름, 규칙, CI를 다룹니다."
   }
 }

@@ -1,12 +1,14 @@
 ---
-title: 서버와 이야기하는 법
+title: 서버 API 부르기
 description: 웹 앱이 ssccops-server를 부르는 래퍼, 오류를 다루는 법, 응답을 도메인 타입으로 옮기는 자리, 새 도메인을 붙이는 순서를 정리합니다.
 sidebar_position: 3
 ---
 
-# 서버와 이야기하는 법
+# 서버 API 부르기
 
-이 문서는 웹 앱이 ssccops-server와 주고받는 방법을 다룹니다. 요청을 보내는 래퍼, 오류를 가르는 기준, 응답 타입을 쓰는 자리, 새 도메인을 붙이는 순서가 내용입니다. 규칙의 원본은 레포 [`AGENTS.md`](https://github.com/SoongSilComputingClub/ssccops-web/blob/develop/AGENTS.md)의 «서버 연동 규약», «데이터 표기», «인증» 절입니다. 서버 쪽에서 본 같은 약속은 [API 약속: 응답, 에러, 인증](../server/api-contract.md)에 있습니다.
+웹 앱이 ssccops-server를 부르는 방법을 다룹니다. 요청을 보내는 래퍼, 오류를 가르는 기준, 응답 타입을 쓰는 자리, 새 도메인을 붙이는 순서가 내용입니다. 화면에 서버 데이터를 붙이기 전에 읽습니다.
+
+규칙의 원본은 레포 [`AGENTS.md`](https://github.com/SoongSilComputingClub/ssccops-web/blob/develop/AGENTS.md)의 «서버 연동 규약», «데이터 표기», «인증» 절입니다. 서버 쪽에서 본 같은 약속은 [API 약속](../server/api-contract.md)에 있습니다.
 
 ## 직접 만든 래퍼: `apiFetch`와 `apiFetchList`
 
@@ -28,7 +30,7 @@ admin만 파일 위치가 `shared/lib/api/`이고, www와 lms는 `shared/api/`�
 { success: boolean, code: string, message: string, data: T | null, page?: PageEnvelope }
 ```
 
-`apiFetch`는 이 봉투를 열어 **`data`만** 돌려줍니다. 호출하는 쪽은 `success`나 HTTP 상태를 다시 볼 필요가 없습니다.
+`apiFetch`는 이 봉투를 열어 `data`만 돌려줍니다. 호출하는 쪽은 `success`나 HTTP 상태를 다시 볼 필요가 없습니다.
 
 ### 실패는 모두 `ApiError`입니다
 
@@ -45,6 +47,19 @@ export class ApiError extends Error {
 
 - `CLIENT_CONFIG_MISSING`: `NEXT_PUBLIC_API_BASE_URL`이 비어 있어 요청을 보내지 않았습니다.
 - `CLIENT_NETWORK_ERROR`: 서버에 연결하지 못했습니다. 서버가 꺼졌을 때와 CORS에 등록되지 않았을 때 증상이 같습니다.
+
+`apiFetch` 한 번이 끝나는 길은 다음 셋 중 하나입니다.
+
+```mermaid
+flowchart LR
+  call["apiFetch(path)"] --> cfg{"API 주소가 설정됨?"}
+  cfg -- 아니오 --> e1["ApiError CLIENT_CONFIG_MISSING"]
+  cfg -- 예 --> req["서버에 요청"]
+  req -- 연결 실패 --> e2["ApiError CLIENT_NETWORK_ERROR"]
+  req -- 응답 받음 --> env{"HTTP 성공이고 success가 true?"}
+  env -- 예 --> data["data 반환"]
+  env -- 아니오 --> e3["ApiError(서버 code, HTTP status)"]
+```
 
 ### 분기는 `message`가 아니라 `code`로 합니다
 
@@ -71,7 +86,7 @@ www와 lms에는 로그인이 필요한 호출용 함수가 따로 있습니다.
 
 ## 목록은 커서 페이징과 «더 보기»
 
-목록 응답에는 `data` 옆에 `page` 봉투가 함께 옵니다. `apiFetch`는 `data`만 돌려주므로 `page`가 버려집니다. 그래서 **커서 페이징 목록은 `apiFetchList`를 씁니다.** 이 함수는 `{ data, page }`를 함께 돌려줍니다.
+목록 응답에는 `data` 옆에 `page` 봉투가 함께 옵니다. `apiFetch`는 `data`만 돌려주므로 `page`가 버려집니다. 그래서 커서 페이징 목록은 **`apiFetchList`를 씁니다.** 이 함수는 `{ data, page }`를 함께 돌려줍니다.
 
 ```ts
 const { data, page } = await apiFetchList<WorkListItemResponse>("/v1/works?...");
@@ -79,11 +94,11 @@ const { data, page } = await apiFetchList<WorkListItemResponse>("/v1/works?...")
 
 `page`에는 `nextCursor`, `hasNext`, `totalCount` 등이 들어 있습니다. 페이지 번호는 없습니다. 다음 페이지는 받은 `nextCursor`를 `cursor` 파라미터로 되돌려 보내서 받고, `hasNext`가 `false`면 끝입니다.
 
-화면은 페이지 번호 목록을 그리지 않고 **«더 보기» 버튼**을 둡니다. admin의 `features/work/model/use-work-list.ts`가 `loadMore`로 다음 페이지를 이어 붙이는 예입니다. 필터 조건이 바뀌면 커서를 버리고 처음부터 다시 받습니다. 다른 조건의 페이지가 한 목록에 섞이지 않게 하려는 것입니다.
+화면은 페이지 번호 목록을 그리지 않고 «더 보기» 버튼을 둡니다. admin의 `features/work/model/use-work-list.ts`가 `loadMore`로 다음 페이지를 이어 붙이는 예입니다. 필터 조건이 바뀌면 커서를 버리고 처음부터 다시 받습니다. 다른 조건의 페이지가 한 목록에 섞이지 않게 하려는 것입니다.
 
 ## 응답 타입과 `to*` 변환은 `entities/<slice>/api`에 손으로 씁니다
 
-서버 응답 타입은 코드 생성 없이 **`entities/<slice>/api/*.ts`에 직접** 씁니다. 같은 파일에 응답을 화면용 도메인 타입으로 옮기는 `to*` 함수를 둡니다. 서버 응답의 모양을 아는 곳은 이 파일 하나로 제한합니다. 계약이 바뀌면 고칠 곳이 `to*` 하나로 끝나기 때문입니다.
+서버 응답 타입은 코드 생성 없이 `entities/<slice>/api/*.ts`에 직접 씁니다. 같은 파일에 응답을 화면용 도메인 타입으로 옮기는 `to*` 함수를 둡니다. **서버 응답의 모양을 아는 곳은 이 파일 하나로 제한합니다.** 계약이 바뀌면 고칠 곳이 `to*` 하나로 끝나기 때문입니다.
 
 admin의 [`entities/curriculum-item/api/curriculum-items.ts`](https://github.com/SoongSilComputingClub/ssccops-web/blob/develop/apps/admin/src/entities/curriculum-item/api/curriculum-items.ts)가 짧은 예입니다.
 
@@ -149,20 +164,20 @@ D-day, 마감 임박, 진행률 같은 값은 저장하지 않고 화면에서 �
 
 ## 인증
 
-로그인은 **Supabase Auth와 Google OAuth**입니다. 세 앱의 로그인 버튼이 Supabase의 `signInWithOAuth`를 `provider: "google"`로 부르고, 돌아오는 OAuth 콜백은 각 앱의 `app/auth/callback/` 라우트가 받습니다.
+로그인은 Supabase Auth와 Google OAuth입니다. 세 앱의 로그인 버튼이 Supabase의 `signInWithOAuth`를 `provider: "google"`로 부르고, 돌아오는 OAuth 콜백은 각 앱의 `app/auth/callback/` 라우트가 받습니다.
 
 서버를 부를 때는 Supabase 세션의 access token을 `Authorization: Bearer` 헤더에 실어 보냅니다. 토큰이 유효한지는 ssccops-server가 판단합니다.
 
 세션 쿠키 갱신은 공유 패키지 [`@ssccops/auth`](https://github.com/SoongSilComputingClub/ssccops-web/blob/develop/packages/auth/AGENTS.md)의 `updateSession` 한 벌이 맡고, 각 앱의 `src/middleware.ts`가 부릅니다.
 
-- `updateSession`은 기본이 **갱신기**입니다. 미인증 요청을 로그인 화면으로 보내는 것은 두 번째 인자로 `SessionGuard`를 줄 때뿐이고, 주는 앱은 admin 하나입니다.
+- `updateSession`은 기본이 갱신기입니다. 미인증 요청을 로그인 화면으로 보내는 것은 두 번째 인자로 `SessionGuard`를 줄 때뿐이고, 주는 앱은 admin 하나입니다.
 - 미들웨어 매처는 좁게 잡습니다. `updateSession`이 요청마다 Supabase를 한 번 왕복하기 때문입니다. 앱별 매처 차이는 [웹 구조](./structure.md#로그인-처리가-앱마다-다릅니다)에 있습니다.
 - Next.js 16에서는 `middleware.ts` 대신 `proxy.ts`가 새 규칙이지만, 바꾸지 않습니다. 배포 어댑터 `@opennextjs/cloudflare`가 아직 `proxy.ts`를 인식하지 못해 빌드가 깨집니다. admin이 한 번 옮겼다가 되돌린 적이 있습니다.
 - 라우트 핸들러에서 자기 주소가 필요하면 `new URL(request.url).origin` 대신 `@ssccops/auth`의 `requestOrigin(request)`를 씁니다. 컨테이너에서 실행하면 `request.url`의 오리진이 공개 도메인이 아니라 서버가 듣는 주소가 되기 때문입니다.
 
 권한 판정(역할, 권한 코드, `useCan`)은 admin에만 있고 원본은 [`apps/admin/AGENTS.md`](https://github.com/SoongSilComputingClub/ssccops-web/blob/develop/apps/admin/AGENTS.md)입니다.
 
-## 다음에 읽을 것
+## 다음 읽을 것
 
-- [API 약속: 응답, 에러, 인증](../server/api-contract.md): 같은 약속을 서버 쪽에서 본 문서
+- [API 약속](../server/api-contract.md): 같은 약속을 서버 쪽에서 본 문서
 - [FSD와 슬라이스](./fsd.md): `entities`와 `features`를 나누는 기준

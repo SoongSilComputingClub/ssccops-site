@@ -15,11 +15,11 @@ SSCCOps에 처음 참여하는 개발자를 위한 문서입니다. 코드를 �
 
 | 차례 | 읽을 것 | 언제 |
 |---|---|---|
-| 1 | [SSCCOps 한눈에 보기](getting-started/overview.md), [로컬 개발 환경](getting-started/local-setup.md) | 가장 먼저 |
+| 1 | [한눈에 보기](getting-started/overview.md), [로컬 개발 환경](getting-started/local-setup.md) | 가장 먼저 |
 | 2 | [요청 하나 따라가기](getting-started/request-flow.md) | 서버와 웹이 어디서 만나는지 볼 때 |
-| 3 | [일하는 흐름](contribute/workflow.md), [커밋, 브랜치, PR 규칙](contribute/commit-branch-pr.md), [CI가 검사하는 것](contribute/ci.md) | 첫 PR을 내기 전 |
+| 3 | [이슈에서 머지까지](contribute/workflow.md), [커밋, 브랜치, PR 규칙](contribute/commit-branch-pr.md), [CI 검사](contribute/ci.md) | 첫 PR을 내기 전 |
 | 4 | 서버: [서버 구조](server/structure.md), [API 약속](server/api-contract.md), [데이터베이스와 스키마 변경](server/database.md) | 서버 코드를 고칠 때 |
-| 4 | 웹: [웹 구조](web/structure.md), [FSD와 슬라이스](web/fsd.md), [서버와 이야기하는 법](web/talking-to-server.md) | 웹 코드를 고칠 때 |
+| 4 | 웹: [웹 구조](web/structure.md), [FSD와 슬라이스](web/fsd.md), [서버 API 부르기](web/talking-to-server.md) | 웹 코드를 고칠 때 |
 
 «작성 필요» 표시가 있는 문서는 아직 쓰지 않은 자리입니다. 담을 내용만 정해 두었습니다.
 

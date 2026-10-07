@@ -6,7 +6,9 @@ sidebar_position: 2
 
 # FSD와 슬라이스
 
-이 문서는 ssccops-web의 각 앱이 `src` 안을 어떻게 나누는지 다룹니다. 세 앱 모두 Feature-Sliced Design(FSD)을 따르고, 규칙의 원본은 레포 [`AGENTS.md`](https://github.com/SoongSilComputingClub/ssccops-web/blob/develop/AGENTS.md)의 «아키텍처» 절입니다.
+ssccops-web의 각 앱이 `src` 안을 어떻게 나누는지 다룹니다. 새 파일을 어느 폴더에 둘지 정할 때 읽습니다.
+
+세 앱 모두 Feature-Sliced Design(FSD)을 따릅니다. 규칙의 원본은 레포 [`AGENTS.md`](https://github.com/SoongSilComputingClub/ssccops-web/blob/develop/AGENTS.md)의 «아키텍처» 절입니다.
 
 ## 계층 다섯 개와 한 방향 의존
 
@@ -24,8 +26,9 @@ src/
 
 의존은 위에서 아래로만 흐릅니다.
 
-```
-app → views → features → entities → shared
+```mermaid
+flowchart LR
+  app --> views --> features --> entities --> shared
 ```
 
 위 계층은 아래 계층을 가져다 쓸 수 있지만, 아래 계층이 위 계층을 가져오지는 않습니다. `entities`가 `features`를 import하거나 `shared`가 `entities`를 import하면 방향이 틀린 것입니다.
@@ -60,7 +63,7 @@ FSD 원래 이름으로는 이 계층이 `pages`입니다. 그런데 Next.js에�
 
 ## 슬라이스
 
-슬라이스는 **한 계층 안에서 도메인별로 나눈 폴더**입니다. `entities/academic-program`, `entities/curriculum-item`, `features/work`가 각각 슬라이스 하나입니다. admin에는 `entities` 슬라이스가 28개 있습니다.
+슬라이스는 한 계층 안에서 도메인별로 나눈 폴더입니다. `entities/academic-program`, `entities/curriculum-item`, `features/work`가 각각 슬라이스 하나입니다. admin에는 `entities` 슬라이스가 28개 있습니다.
 
 슬라이스 안의 모양은 계층마다 정해져 있습니다.
 
@@ -93,7 +96,7 @@ entities/academic-program/
 
 그래서 비슷한 타입이 두 슬라이스에 한 벌씩 있는 것이 정상인 경우가 있습니다. admin의 `entities/notification`(내 알림)과 `entities/notification-type`(알림 수신 정책)은 같은 앱 어휘를 각자 들고 있고, `entities/event`의 참가자 명단 변환기도 `entities/response`의 비슷한 타입을 가져오지 않습니다.
 
-여러 엔티티를 함께 바꾸거나 엮는 로직은 **`features`에 둡니다.** features는 entities보다 위에 있어 여러 엔티티를 함께 가져올 수 있습니다.
+여러 엔티티를 함께 바꾸거나 엮는 로직은 `features`에 둡니다. features는 entities보다 위에 있어 여러 엔티티를 함께 가져올 수 있습니다.
 
 :::note
 
@@ -103,7 +106,7 @@ entities/academic-program/
 
 ### 엔티티 슬라이스를 나누는 기준
 
-엔티티 슬라이스는 대체로 **서버 테이블 하나**를 단위로 둡니다. 예를 들어 `entities/curriculum-item`은 커리큘럼 항목 테이블(`crclm_artcl`)을 맡습니다. 타입 이름도 테이블 ID를 따릅니다(데이터 표기 규칙은 [서버와 이야기하는 법](./talking-to-server.md#데이터-표기)에 있습니다).
+엔티티 슬라이스는 대체로 서버 테이블 하나를 단위로 둡니다. 예를 들어 `entities/curriculum-item`은 커리큘럼 항목 테이블(`crclm_artcl`)을 맡습니다. 타입 이름도 테이블 ID를 따릅니다(데이터 표기 규칙은 [서버 API 부르기](./talking-to-server.md#데이터-표기)에 있습니다).
 
 다만 모든 슬라이스가 테이블과 1:1은 아닙니다. admin의 `entities/dashboard`는 대시보드 화면이 받는 묶음 응답을, `entities/session`은 로그인한 사람의 세션과 권한을 맡습니다. 새 슬라이스를 만들 때는 «서버 응답의 모양을 아는 곳이 한 군데인가»를 기준으로 봅니다.
 
@@ -111,18 +114,20 @@ entities/academic-program/
 
 [ssccops-web#702](https://github.com/SoongSilComputingClub/ssccops-web/pull/702)(이슈 #701)는 같은 계층 참조를 바로잡은 PR입니다.
 
-**문제.** admin에서 커리큘럼 항목의 도메인 타입은 `entities/curriculum-item/model`에 있었는데, 그것을 조회하는 함수와 응답 타입, 변환 함수는 `entities/academic-program/api`에 있었습니다. 그래서 `academic-program`이 `curriculum-item`의 타입을 가져다 쓰고 있었습니다. 같은 계층 슬라이스끼리 참조한 것입니다.
+admin에서 커리큘럼 항목의 도메인 타입은 `entities/curriculum-item/model`에 있었는데, 그것을 조회하는 함수와 응답 타입, 변환 함수는 `entities/academic-program/api`에 있었습니다. 그래서 `academic-program`이 `curriculum-item`의 타입을 가져다 쓰고 있었습니다. 같은 계층 슬라이스끼리 참조한 것입니다.
 
-**고칠 수 있는 길은 두 가지였습니다.**
+고칠 수 있는 길은 두 가지였습니다.
 
 1. 타입을 `academic-program` 쪽으로 옮겨 방향을 뒤집는다.
 2. 조회 함수를 타입이 있는 `curriculum-item` 쪽으로 데려온다.
 
-**2번을 골랐습니다.** 그러면 `curriculum-item`도 다른 모든 슬라이스와 같은 `entities/<slice>/{api,model}` 모양이 되고, 슬라이스 사이 참조가 사라집니다. 요청 URL이 `/v1/academic-programs/{id}/curriculum-items`로 학술 프로그램 아래에 있는 것은 서버가 하위 자원으로 둔 것이라 그대로 두었습니다. URL 모양이 슬라이스 소유를 정하지는 않습니다.
+2번을 골랐습니다. 그러면 `curriculum-item`도 다른 모든 슬라이스와 같은 `entities/<slice>/{api,model}` 모양이 되고, 슬라이스 사이 참조가 사라집니다.
+
+요청 URL이 `/v1/academic-programs/{id}/curriculum-items`로 학술 프로그램 아래에 있는 것은 서버가 하위 자원으로 둔 것이라 그대로 두었습니다. URL 모양이 슬라이스 소유를 정하지는 않습니다.
 
 결과로 생긴 파일이 [`apps/admin/src/entities/curriculum-item/api/curriculum-items.ts`](https://github.com/SoongSilComputingClub/ssccops-web/blob/develop/apps/admin/src/entities/curriculum-item/api/curriculum-items.ts)입니다. 응답 타입, `toCurriculumItem` 변환 함수, `fetchCurriculumItems` 조회 함수가 한 파일에 있고, 머리 주석에 위 판단이 적혀 있습니다.
 
-## 다음에 읽을 것
+## 다음 읽을 것
 
-- [웹 구조: 모노레포와 앱 셋](./structure.md): 앱 사이에서 코드를 나누는 «둘 이상» 규칙
-- [서버와 이야기하는 법](./talking-to-server.md): `entities/<slice>/api`에 무엇을 쓰는지
+- [웹 구조](./structure.md): 앱 사이에서 코드를 나누는 «둘 이상» 규칙
+- [서버 API 부르기](./talking-to-server.md): `entities/<slice>/api`에 무엇을 쓰는지

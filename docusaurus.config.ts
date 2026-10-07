@@ -55,6 +55,8 @@ const config: Config = {
     // `.md`는 CommonMark(GFM)로, `.mdx`만 MDX로 읽는다. 기본값(전부 MDX)이면 본문의 `{`·`<`가
     // 코드로 해석돼 평범한 글이 빌드를 깬다 — 글은 순수 GFM으로 쓴다는 규칙(ADR-0054 규칙 1)과 같은 선택이다.
     format: 'detect',
+    // ```mermaid 코드 블록을 그림으로 그린다(@docusaurus/theme-mermaid). .md에서도 동작한다.
+    mermaid: true,
     hooks: {
       onBrokenMarkdownLinks: 'throw',
     },
@@ -144,6 +146,7 @@ const config: Config = {
   // 조사가 붙은 말(«행사를»)과 합성어 안의 말(«참가신청서»의 «참가»)까지 찾는다. 대상은 문서 묶음 둘과 블로그 둘.
   // 화면 문구는 이 플러그인에 한국어가 없어 i18n/ko/code.json에서 번역한다.
   themes: [
+    '@docusaurus/theme-mermaid',
     [
       '@easyops-cn/docusaurus-search-local',
       {
@@ -201,6 +204,13 @@ const config: Config = {
         },
       ],
       copyright: `© ${new Date().getFullYear()} SSCC 숭실컴퓨팅클럽`,
+    },
+    // Mermaid 그림도 본문과 같은 글꼴로. 다크 모드에서는 dark 테마로 바뀐다.
+    mermaid: {
+      theme: {light: 'neutral', dark: 'dark'},
+      options: {
+        fontFamily: "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+      },
     },
     prism: {
       theme: prismThemes.github,

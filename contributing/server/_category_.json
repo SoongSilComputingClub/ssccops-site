@@ -1,8 +1,8 @@
 {
-  "label": "서버 (Spring)",
+  "label": "서버",
   "position": 2,
   "link": {
     "type": "generated-index",
-    "description": "ssccops-server의 구조, API 약속, 스키마 변경."
+    "description": "ssccops-server(Spring Boot)의 구조, API 약속, 스키마 변경을 다룹니다."
   }
 }
