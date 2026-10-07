@@ -30,6 +30,8 @@ PR 템플릿과 📝 Docs 이슈 템플릿의 «공개 경계» 체크박스가 
 ```
 guide/                사용 설명서 (/guide). index.md가 첫 페이지
 sidebars.ts           사용 설명서 목차 (폴더와 sidebar_position으로 자동)
+contributing/         개발 참여 (/contributing). 두 번째 문서 묶음
+sidebarsContributing.ts  개발 참여 목차
 blog/                 글 (파일 하나가 글 하나), authors.yml
 src/pages/index.tsx   랜딩
 src/theme/BlogPostItem/  블로그 글 아래 giscus 댓글
@@ -44,6 +46,10 @@ docusaurus.config.ts  사이트 설정
 새 설명서는 역할별 할 일 기준으로 한 페이지에 할 일 하나를 쓰고, 버전 딱지(`v0.2.x`에서 생김)는 본문에 두지 않는다.
 **옛 주소는 `guide/index.md` 한 곳에서만 안내한다.** 메뉴, 랜딩, 푸터는 `/guide`를 가리킨다. 새 설명서가 옛 내용을
 다 덮으면 `guide.sscc-ssu.com`을 `/guide`로 리다이렉트하고, 메타 쪽 HTML과 `guide/index.md`의 안내를 지운다.
+
+**개발 참여(`/contributing`)는 처음 온 개발자가 읽는 순서로 풀어 쓴 안내다**(ssccops ADR-0061). 로컬 실행 방법과 개발 규칙의
+원본은 server와 web의 README와 `AGENTS.md`이니 옮겨 적지 않고 링크한다. 서버 구성, 내부 주소, 배포, 장애 대응 같은 운영 내용은
+공개하지 않고 «운영진에게 받는다»라고만 쓴다.
 
 ## 명령
 

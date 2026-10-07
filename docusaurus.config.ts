@@ -101,7 +101,20 @@ const config: Config = {
   ],
 
   // 링크 공유용 카드를 빌드 때 굽는다(plugins/og-image). 사이트 카드 한 장과 블로그 글마다 한 장.
-  plugins: ['./plugins/og-image/index.ts'],
+  plugins: [
+    './plugins/og-image/index.ts',
+    // 개발 참여(/contributing). 사용 설명서와 목차, 검색 범위가 섞이지 않게 문서 묶음을 따로 둔다(ssccops ADR-0061).
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'contributing',
+        path: 'contributing',
+        routeBasePath: 'contributing',
+        sidebarPath: './sidebarsContributing.ts',
+        editUrl: `https://github.com/${REPO}/edit/develop/`,
+      },
+    ],
+  ],
 
   themeConfig: {
     // 사이트 카드. 파일은 plugins/og-image가 빌드 때 만든다.
@@ -114,6 +127,7 @@ const config: Config = {
       items: [
         {type: 'docSidebar', sidebarId: 'guideSidebar', label: '사용 설명서', position: 'left'},
         {to: '/blog', label: '블로그', position: 'left'},
+        {to: '/contributing', label: '개발 참여', position: 'right'},
         {href: `https://github.com/${REPO}`, label: 'GitHub', position: 'right'},
       ],
     },
@@ -133,7 +147,10 @@ const config: Config = {
         },
         {
           title: '소스',
-          items: [{label: 'GitHub', href: `https://github.com/${REPO}`}],
+          items: [
+            {label: '개발 참여', to: '/contributing'},
+            {label: 'GitHub', href: `https://github.com/${REPO}`},
+          ],
         },
       ],
       copyright: `© ${new Date().getFullYear()} SSCC 숭실컴퓨팅클럽`,
