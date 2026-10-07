@@ -10,12 +10,23 @@ const REPO = 'SoongSilComputingClub/ssccops-site';
 const config: Config = {
   title: 'SSCCOps',
   tagline: '숭실컴퓨팅클럽의 회원·학술·업무·행사·폼을 한 곳에서 다루는 시스템',
+  // 본문 글꼴 Pretendard(SIL OFL 1.1). 페이지에 쓰인 글자만 내려받는 dynamic subset을 jsDelivr에서 불러온다.
+  // 레포에 글꼴 파일을 두지 않으므로 라이선스 파일도 따로 두지 않는다. CDN이 막히면 시스템 글꼴로 대체된다.
+  stylesheets: [
+    {
+      href: 'https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css',
+      crossorigin: 'anonymous',
+    },
+  ],
+
   // 아이콘은 icon/SSCC-Flat.png를 벡터로 옮긴 것이다. GitHub처럼 배경 없이 다크 모드에서 밝은 색으로 바뀌고,
   // SVG를 못 읽는 브라우저는 어두운 색 favicon.ico를 쓴다.
   headTags: [
     {tagName: 'link', attributes: {rel: 'icon', href: '/favicon.ico', sizes: '32x32'}},
     {tagName: 'link', attributes: {rel: 'icon', href: '/img/favicon.svg', type: 'image/svg+xml'}},
     {tagName: 'link', attributes: {rel: 'apple-touch-icon', href: '/img/apple-touch-icon.png'}},
+    // 글꼴 CDN에 미리 연결해 첫 화면의 글꼴 지연을 줄인다.
+    {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://cdn.jsdelivr.net', crossorigin: 'anonymous'}},
   ],
 
   future: {
