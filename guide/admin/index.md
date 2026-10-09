@@ -11,11 +11,11 @@ description: 운영진이 쓰는 앱입니다. 업무와 승인, 회원 명부�
 
 | 묶음 | 페이지 |
 |---|---|
-| 홈 · 업무 | [운영 대시보드](operations/dashboard.md) · [운영 통합 · 등록](operations/overview.md) · [업무](operations/works.md) · [하위 업무](operations/sub-works.md) · [승인함](operations/approvals.md) |
-| 회원 | [회원 명부 · 상세](members/roster.md) · [CSV 회원 이관](members/csv-import.md) · [역할 · 권한](members/roles.md) |
-| 폼 | [폼 관리 · 편집기](forms/manage.md) · [시스템 폼 목록](forms/system-forms.md) · [응답 확인](forms/responses.md) · [공개 폼(응답자 화면)](forms/public-form.md) |
-| 행사 | [행사 관리](events/manage.md) · [신청 심사 · 참가자](events/participants.md) |
-| 콘텐츠 | [페이지 · 포스트](content.md) |
-| 학술 감독 | [기획안 접수 열기](academic/proposal-intake.md) · [기획안 검토](academic/proposal-review.md) · [모집 관리 · 일정 수정](academic/recruitment.md) · [스터디 · 프로젝트 · 트랙](academic/programs.md) · [회차 · 출석 승인](academic/session-review.md) · [학술 대시보드 · 통계](academic/dashboard.md) |
-| 규정 도우미 | [RAG 설정](rag-settings.md) |
-| 메뉴 · 설정 | [사이드바 · 전체 메뉴](settings/navigation.md) · [알림 유형](settings/notification-types.md) |
+| 홈 · 업무 | [운영 대시보드](operations/dashboard.mdx) · [운영 통합 · 등록](operations/overview.mdx) · [업무](operations/works.mdx) · [하위 업무](operations/sub-works.mdx) · [승인함](operations/approvals.mdx) |
+| 회원 | [회원 명부 · 상세](members/roster.mdx) · [CSV 회원 이관](members/csv-import.mdx) · [역할 · 권한](members/roles.mdx) |
+| 폼 | [폼 관리 · 편집기](forms/manage.mdx) · [시스템 폼 목록](forms/system-forms.mdx) · [응답 확인](forms/responses.mdx) · [공개 폼(응답자 화면)](forms/public-form.mdx) |
+| 행사 | [행사 관리](events/manage.mdx) · [신청 심사 · 참가자](events/participants.mdx) |
+| 콘텐츠 | [페이지 · 포스트](content.mdx) |
+| 학술 감독 | [기획안 접수 열기](academic/proposal-intake.mdx) · [기획안 검토](academic/proposal-review.mdx) · [모집 관리 · 일정 수정](academic/recruitment.mdx) · [스터디 · 프로젝트 · 트랙](academic/programs.mdx) · [회차 · 출석 승인](academic/session-review.mdx) · [학술 대시보드 · 통계](academic/dashboard.mdx) |
+| 규정 도우미 | [RAG 설정](rag-settings.mdx) |
+| 메뉴 · 설정 | [사이드바 · 전체 메뉴](settings/navigation.mdx) · [알림 유형](settings/notification-types.mdx) |

@@ -1,0 +1,28 @@
+---
+title: 학술 대시보드 · 회차 이력 · 출석 통계
+sidebar_label: 학술 대시보드 · 통계
+description: 학술국장이 전체 활동을 확인하는 세 화면입니다. 대시보드, 회차 이력, 출석 통계를 안내합니다.
+sidebar_position: 6
+---
+
+import {AcademicDashboardMock} from '@site/src/components/GuideMock/admin/academic/dashboard';
+
+# 학술 대시보드 · 회차 이력 · 출석 통계
+
+**주소** `/academic-programs/dashboard` · `/academic-programs/sessions` · `/academic-programs/attendance`
+
+학술국장이 전체 활동을 확인하는 세 화면입니다. **대시보드**에서는 지연된 업무를, **회차 이력**에서는 활동별 회차 진행 상황을, **출석 통계**에서는 회원별 출석률을 확인합니다.
+
+<AcademicDashboardMock />
+
+:::note[참고]
+
+**«이번 주 회차»는 진행일 기준입니다.** 아직 진행하지 않은 예정 회차는 여기 들어오지 않습니다 — 목록이 진행일만 주기 때문입니다. «**진행 더딘 활동**»도 정확한 지연 판정이 아니라 **진행 중이면서 진행률 40% 미만**인 활동을 세어 보여주는 근사치입니다.
+
+:::
+
+## 출석 통계
+
+**주소** `/academic-programs/attendance`
+
+활동별·팀원별 출석률을 봅니다. **출석률 70% 미만**은 눈에 띄게 표시됩니다 — 수료 기준(2/3)에서 온 값이라, 이 아래로 내려간 팀원은 수료가 어려워집니다.

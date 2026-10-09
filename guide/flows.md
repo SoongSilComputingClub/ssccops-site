@@ -14,42 +14,42 @@ sidebar_position: 2
 
 | 순서 | 하는 일 | 누가 | 어디서 |
 |---|---|---|---|
-| **1** | 기획안 **접수 시작** | 운영진 | 운영관리 · [기획안 접수 열기](admin/academic/proposal-intake.md) |
-| **2** | 기획안 제출 | 회원 | 학술 앱 · [기획안 제출](lms/proposals.md) |
-| **3** | 검토 · 승인 | 학술국장 | 운영관리 · [기획안 검토](admin/academic/proposal-review.md) |
-| **4** | 모집 시작 · 일정 | 학술국장 | 운영관리 · [모집 관리](admin/academic/recruitment.md) |
-| **5** | 지원서 문항 작성 | 스터디장 | 학술 앱 · [모집 관리 · 지원서 문항](lms/recruitment.md) |
-| **6** | 회차 기록 · 출석 | 스터디장 | 학술 앱 · [회차 기록](lms/sessions.md) |
-| **7** | 회차 승인 | 학술국장 | 운영관리 · [회차 · 출석 승인](admin/academic/session-review.md) |
+| **1** | 기획안 **접수 시작** | 운영진 | 운영관리 · [기획안 접수 열기](admin/academic/proposal-intake.mdx) |
+| **2** | 기획안 제출 | 회원 | 학술 앱 · [기획안 제출](lms/proposals.mdx) |
+| **3** | 검토 · 승인 | 학술국장 | 운영관리 · [기획안 검토](admin/academic/proposal-review.mdx) |
+| **4** | 모집 시작 · 일정 | 학술국장 | 운영관리 · [모집 관리](admin/academic/recruitment.mdx) |
+| **5** | 지원서 문항 작성 | 스터디장 | 학술 앱 · [모집 관리 · 지원서 문항](lms/recruitment.mdx) |
+| **6** | 회차 기록 · 출석 | 스터디장 | 학술 앱 · [회차 기록](lms/sessions.mdx) |
+| **7** | 회차 승인 | 학술국장 | 운영관리 · [회차 · 출석 승인](admin/academic/session-review.mdx) |
 
-**기획안 폼의 공개 링크는 쓰지 않습니다.** 기획안은 시스템 폼이라 응답을 학술 앱에서 받습니다 — 어드민 폼 상세에 공개 링크가 없고([시스템 폼 목록](admin/forms/system-forms.md)), 옛 `/f/…` 링크로 들어와도 학술 앱 제출 화면으로 넘어갑니다([공개 폼](admin/forms/public-form.md)).
+**기획안 폼의 공개 링크는 쓰지 않습니다.** 기획안은 시스템 폼이라 응답을 학술 앱에서 받습니다 — 어드민 폼 상세에 공개 링크가 없고([시스템 폼 목록](admin/forms/system-forms.mdx)), 옛 `/f/…` 링크로 들어와도 학술 앱 제출 화면으로 넘어갑니다([공개 폼](admin/forms/public-form.mdx)).
 
 ## 행사 — 열기부터 참가자 확정까지
 
 | 순서 | 하는 일 | 누가 | 어디서 |
 |---|---|---|---|
-| **1** | 신청서(폼) 만들기 | 운영진 | 운영관리 · [폼 관리 · 편집기](admin/forms/manage.md) |
-| **2** | 행사 등록 · 게시 | 운영진 | 운영관리 · [행사 관리](admin/events/manage.md) |
-| **3** | 행사 보기 | 누구나 | 공개 웹사이트 · [행사 목록 · 상세](www/events.md) |
-| **4** | 참가 신청 | 회원 | 공개 웹사이트 · [참가 신청](www/apply.md) |
-| **5** | 심사 · 명단 확정 | 운영진 | 운영관리 · [신청 심사 · 참가자](admin/events/participants.md) |
-| **6** | 신청 상태 확인 | 회원 | 공개 웹사이트 · [내 활동](www/me.md) |
+| **1** | 신청서(폼) 만들기 | 운영진 | 운영관리 · [폼 관리 · 편집기](admin/forms/manage.mdx) |
+| **2** | 행사 등록 · 게시 | 운영진 | 운영관리 · [행사 관리](admin/events/manage.mdx) |
+| **3** | 행사 보기 | 누구나 | 공개 웹사이트 · [행사 목록 · 상세](www/events.mdx) |
+| **4** | 참가 신청 | 회원 | 공개 웹사이트 · [참가 신청](www/apply.mdx) |
+| **5** | 심사 · 명단 확정 | 운영진 | 운영관리 · [신청 심사 · 참가자](admin/events/participants.mdx) |
+| **6** | 신청 상태 확인 | 회원 | 공개 웹사이트 · [내 활동](www/me.mdx) |
 
 ## 폼 — 만들고 · 받고 · 읽기
 
 | 순서 | 하는 일 | 누가 | 어디서 |
 |---|---|---|---|
-| **1** | 폼 제작 · 접수 시작 | 운영진 | 운영관리 · [폼 관리 · 편집기](admin/forms/manage.md) |
-| **2** | 링크 공유 · 응답 | 응답자 | 공개 웹사이트 · [공개 폼](admin/forms/public-form.md) |
-| **3** | 응답 읽기 · CSV | 운영진 | 운영관리 · [응답 확인](admin/forms/responses.md) |
-| **4** | 낸 폼 다시 보기 | 회원 | 공개 웹사이트 · [내 활동](www/me.md) |
+| **1** | 폼 제작 · 접수 시작 | 운영진 | 운영관리 · [폼 관리 · 편집기](admin/forms/manage.mdx) |
+| **2** | 링크 공유 · 응답 | 응답자 | 공개 웹사이트 · [공개 폼](admin/forms/public-form.mdx) |
+| **3** | 응답 읽기 · CSV | 운영진 | 운영관리 · [응답 확인](admin/forms/responses.mdx) |
+| **4** | 낸 폼 다시 보기 | 회원 | 공개 웹사이트 · [내 활동](www/me.mdx) |
 
 ## 콘텐츠 — 쓰는 곳과 보이는 곳
 
 | 순서 | 하는 일 | 누가 | 어디서 |
 |---|---|---|---|
-| **1** | 페이지 · 포스트 작성 · 게시 | 운영진 | 운영관리 · [콘텐츠](admin/content.md) |
-| **2** | 공개 화면에 표시 | 누구나 | 공개 웹사이트 · [다섯 축 · 홈](www/site.md) |
+| **1** | 페이지 · 포스트 작성 · 게시 | 운영진 | 운영관리 · [콘텐츠](admin/content.mdx) |
+| **2** | 공개 화면에 표시 | 누구나 | 공개 웹사이트 · [다섯 축 · 홈](www/site.mdx) |
 
 게시한 글이 공개 화면에 나타나기까지 **최대 5분** 걸립니다. 바로 안 보인다고 다시 게시하지 마세요.
 
@@ -57,7 +57,7 @@ sidebar_position: 2
 
 | 순서 | 하는 일 | 누가 | 어디서 |
 |---|---|---|---|
-| **1** | 운영 건 등록 | 운영진 | 운영관리 · [운영 통합 · 등록](admin/operations/overview.md) |
-| **2** | 업무 진행 · 담당자 | 담당자 | 운영관리 · [업무](admin/operations/works.md) |
-| **3** | 하위 업무 단계 · 첨부 | 담당자 | 운영관리 · [하위 업무](admin/operations/sub-works.md) |
-| **4** | 승인 · 반려 | 국장 이상 | 운영관리 · [승인함](admin/operations/approvals.md) |
+| **1** | 운영 건 등록 | 운영진 | 운영관리 · [운영 통합 · 등록](admin/operations/overview.mdx) |
+| **2** | 업무 진행 · 담당자 | 담당자 | 운영관리 · [업무](admin/operations/works.mdx) |
+| **3** | 하위 업무 단계 · 첨부 | 담당자 | 운영관리 · [하위 업무](admin/operations/sub-works.mdx) |
+| **4** | 승인 · 반려 | 국장 이상 | 운영관리 · [승인함](admin/operations/approvals.mdx) |

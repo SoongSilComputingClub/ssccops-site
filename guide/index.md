@@ -65,11 +65,11 @@ v0.1까지 SSCCOps는 **운영관리 어드민 하나**였습니다. v0.2.0부�
 
 | 나는 | 쓰는 앱 | 읽을 곳 |
 |---|---|---|
-| 운영진 | 운영관리(admin) | [운영 대시보드](admin/operations/dashboard.md)부터 [공개 폼](admin/forms/public-form.md)까지 (업무 · 회원 · 폼) + [행사 관리](admin/events/manage.md) · [신청 심사 · 참가자 관리](admin/events/participants.md) (행사) + [기획안 접수 열기](admin/academic/proposal-intake.md) (기획안 접수) |
-| 학술국장 | 운영관리(admin) | [기획안 접수 열기](admin/academic/proposal-intake.md)부터 [학술 대시보드](admin/academic/dashboard.md)까지 — 기획안 접수를 여는 것부터 회차 승인까지 |
-| 스터디장 · 프로젝트장 · 트랙장 | 학술 앱(lms) | [첫 화면 · 스터디장 대시보드](lms/home.md), [회차 기록 · 출석부](lms/sessions.md), [내 프로그램 · 팀원 관리](lms/programs.md) — 대시보드 · 회차 기록 · 출석부 · 팀원 |
-| 일반 회원 | 학술 앱(lms), 공개 웹사이트(www) | [기획안 제출 · 재제출](lms/proposals.md) (기획안 제출) · [참가 신청](www/apply.md) (행사 신청) |
-| 아직 회원이 아닌 사람 | 공개 웹사이트(www) | [행사 목록 · 상세](www/events.md) — 행사 목록은 로그인 없이 볼 수 있고, 신청하려 할 때 가입을 함께 안내합니다 |
+| 운영진 | 운영관리(admin) | [운영 대시보드](admin/operations/dashboard.mdx)부터 [공개 폼](admin/forms/public-form.mdx)까지 (업무 · 회원 · 폼) + [행사 관리](admin/events/manage.mdx) · [신청 심사 · 참가자 관리](admin/events/participants.mdx) (행사) + [기획안 접수 열기](admin/academic/proposal-intake.mdx) (기획안 접수) |
+| 학술국장 | 운영관리(admin) | [기획안 접수 열기](admin/academic/proposal-intake.mdx)부터 [학술 대시보드](admin/academic/dashboard.mdx)까지 — 기획안 접수를 여는 것부터 회차 승인까지 |
+| 스터디장 · 프로젝트장 · 트랙장 | 학술 앱(lms) | [첫 화면 · 스터디장 대시보드](lms/home.mdx), [회차 기록 · 출석부](lms/sessions.mdx), [내 프로그램 · 팀원 관리](lms/programs.mdx) — 대시보드 · 회차 기록 · 출석부 · 팀원 |
+| 일반 회원 | 학술 앱(lms), 공개 웹사이트(www) | [기획안 제출 · 재제출](lms/proposals.mdx) (기획안 제출) · [참가 신청](www/apply.mdx) (행사 신청) |
+| 아직 회원이 아닌 사람 | 공개 웹사이트(www) | [행사 목록 · 상세](www/events.mdx) — 행사 목록은 로그인 없이 볼 수 있고, 신청하려 할 때 가입을 함께 안내합니다 |
 
 :::note[주의]
 
