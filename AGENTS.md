@@ -23,7 +23,8 @@ SSCCOps의 공개 사이트다. 랜딩, 사용 설명서, 블로그를 `https://
 - 메타 레포(`ssccops`) 이슈나 문서 링크. 독자는 열 수 없으니 필요한 내용은 요지를 풀어 쓴다
 - 회원 정보(실명, 학번, 연락처)와 비밀값(토큰, 키, 비밀번호). 스크린샷도 같다
 
-PR 템플릿과 📝 Docs 이슈 템플릿의 «공개 경계» 체크박스가 같은 목록이다.
+PR 템플릿과 📝 Docs 이슈 템플릿의 «공개 경계» 체크박스가 같은 목록이다. 글에 이 가운데 무엇이 필요하면 값을 적지 않고
+구글 드라이브 비공개 자료의 문서 이름을 적는다(아래 «장애 대응»).
 
 ## 구조
 
@@ -32,6 +33,8 @@ guide/                사용 설명서 (/guide). index.md가 첫 페이지
 sidebars.ts           사용 설명서 목차 (폴더와 sidebar_position으로 자동)
 contributing/         개발 참여 (/contributing). 두 번째 문서 묶음
 sidebarsContributing.ts  개발 참여 목차
+incidents/            장애 대응 (/incidents). 세 번째 문서 묶음
+sidebarsIncidents.ts  장애 대응 목차
 blog/                 글 (파일 하나가 글 하나), authors.yml
 releases/             릴리즈 노트 (/releases). 두 번째 블로그, _template.md가 틀
 src/pages/index.tsx   랜딩
@@ -50,8 +53,13 @@ docusaurus.config.ts  사이트 설정
 다 덮으면 `guide.sscc-ssu.com`을 `/guide`로 리다이렉트하고, 메타 쪽 HTML과 `guide/index.md`의 안내를 지운다.
 
 **개발 참여(`/contributing`)는 처음 온 개발자가 읽는 순서로 풀어 쓴 안내다**(ssccops ADR-0061). 로컬 실행 방법과 개발 규칙의
-원본은 server와 web의 README와 `AGENTS.md`이니 옮겨 적지 않고 링크한다. 서버 구성, 내부 주소, 배포, 장애 대응 같은 운영 내용은
+원본은 server와 web의 README와 `AGENTS.md`이니 옮겨 적지 않고 링크한다. 서버 구성, 내부 주소, 배포 같은 운영 내용은
 공개하지 않고 «운영진에게 받는다»라고만 쓴다.
+
+**장애 대응(`/incidents`)은 무언가 멈췄을 때의 확인과 복구 절차다.** 어느 관리 화면에서 무엇을 누르는지는 여기 쓴다.
+관리 화면의 주소와 계정, 서버 기기와 그 위치, 리소스와 프로젝트 이름, 연락처는 구글 드라이브 «SSCCOps 운영 비공개 자료»
+폴더에 두고, 페이지 머리의 `:::note[비공개 자료]`에서 링크 없이 «드라이브 «문서 이름» › 절 이름»으로 가리킨다. 드라이브 문서의
+절 이름을 바꾸면 이 레포의 가리키는 줄도 함께 고친다. 지난 사건은 이슈 번호 없이 되풀이된 모양으로 풀어 쓴다.
 
 **흐름과 구조 그림은 Mermaid로 그린다**(```mermaid 코드 블록, `@docusaurus/theme-mermaid`). 폴더 구조는 그림이 아니라 코드 블록으로 둔다.
 블로그 글에서도 쓸 수 있다. 동아리 블로그(AstroPaper)로 옮길 때는 그쪽에 `astro-mermaid` 통합을 켠다.
