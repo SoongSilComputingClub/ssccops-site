@@ -172,6 +172,9 @@ const config: Config = {
         explicitSearchResultPath: true,
         // 기본값 1이면 두 글자 낱말에서 한 글자만 같아도 걸린다(«참가»로 «참여»가 나온다). 한국어에서는 끈다.
         fuzzyMatchingDistance: 0,
+        // 사용 설명서의 예시 화면(src/components/GuideMock)은 가짜 이름과 숫자로 채운 그림이라 색인하지 않는다.
+        // 버튼과 메뉴 이름은 본문에 같은 말이 있어 그쪽으로 찾힌다.
+        ignoreCssSelectors: ['.gm-frame'],
       },
     ],
   ],
