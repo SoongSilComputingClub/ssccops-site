@@ -116,6 +116,18 @@ const config: Config = {
         editUrl: `https://github.com/${REPO}/edit/develop/`,
       },
     ],
+    // 장애 대응(/incidents). 확인과 복구 절차를 싣는다. 관리 화면 주소, 계정, 서버 구성은
+    // 구글 드라이브 비공개 자료에 두고 문서 이름으로만 가리킨다.
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'incidents',
+        path: 'incidents',
+        routeBasePath: 'incidents',
+        sidebarPath: './sidebarsIncidents.ts',
+        editUrl: `https://github.com/${REPO}/edit/develop/`,
+      },
+    ],
     // 릴리즈 노트(/releases). 운영진과 회원이 읽는 버전별 안내라 기술 블로그와 목록, RSS를 따로 둔다(ssccops ADR-0061).
     // 댓글은 붙지 않는다(src/theme/BlogPostItem이 기본 블로그에만 그린다).
     [
@@ -143,7 +155,7 @@ const config: Config = {
   ],
 
   // 사이트 검색. 빌드 때 색인을 만들어 브라우저에서 찾는다(외부 서비스 없음). lunr의 한국어 모듈(lunr.ko)로
-  // 조사가 붙은 말(«행사를»)과 합성어 안의 말(«참가신청서»의 «참가»)까지 찾는다. 대상은 문서 묶음 둘과 블로그 둘.
+  // 조사가 붙은 말(«행사를»)과 합성어 안의 말(«참가신청서»의 «참가»)까지 찾는다. 대상은 문서 묶음 셋과 블로그 둘.
   // 화면 문구는 이 플러그인에 한국어가 없어 i18n/ko/code.json에서 번역한다.
   themes: [
     '@docusaurus/theme-mermaid',
@@ -152,8 +164,8 @@ const config: Config = {
       {
         hashed: true,
         language: ['en', 'ko'],
-        docsDir: ['guide', 'contributing'],
-        docsRouteBasePath: ['guide', 'contributing'],
+        docsDir: ['guide', 'contributing', 'incidents'],
+        docsRouteBasePath: ['guide', 'contributing', 'incidents'],
         blogDir: ['blog', 'releases'],
         blogRouteBasePath: ['blog', 'releases'],
         highlightSearchTermsOnTargetPage: true,
@@ -176,6 +188,7 @@ const config: Config = {
         {type: 'docSidebar', sidebarId: 'guideSidebar', label: '사용 설명서', position: 'left'},
         {to: '/releases', label: '릴리즈 노트', position: 'left'},
         {to: '/blog', label: '블로그', position: 'left'},
+        {to: '/incidents', label: '장애 대응', position: 'right'},
         {to: '/contributing', label: '개발 참여', position: 'right'},
         {href: `https://github.com/${REPO}`, label: 'GitHub', position: 'right'},
       ],
@@ -198,6 +211,7 @@ const config: Config = {
         {
           title: '소스',
           items: [
+            {label: '장애 대응', to: '/incidents'},
             {label: '개발 참여', to: '/contributing'},
             {label: 'GitHub', href: `https://github.com/${REPO}`},
           ],

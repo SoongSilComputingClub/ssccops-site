@@ -1,0 +1,9 @@
+{
+  "label": "복구 절차",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "slug": "/recovery",
+    "description": "관리 화면에서 API 서버를 다시 시작하고, DB를 다시 켜고, 배포를 되돌리는 절차입니다. 관리 화면 주소와 계정은 비공개 자료에 있습니다."
+  }
+}
