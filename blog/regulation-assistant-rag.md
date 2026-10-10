@@ -1,0 +1,500 @@
+---
+title: 회칙에 답하는 규정 도우미를 만든 한 달
+description: Spring AI와 pgvector로 동아리 회칙에 출처를 달아 답하는 RAG를 SSCCOps 서버에 붙였습니다. 회칙을 조 단위로 자른 이유, 근거가 없을 때 답하지 않게 만든 장치, 직접 써 보고 나서야 보인 문제들을 정리했습니다.
+date: 2026-10-11
+authors: [bell-person-ii]
+tags: [rag, spring-ai, server]
+---
+
+동아리를 운영하다 보면 회칙을 펼 일이 생각보다 자주 생깁니다. 정회원 승격 심사를 앞두고 조건을 다시 확인하거나, 총회 안건이 의결 정족수를 채웠는지 따지거나, 임원이 임기 중에 그만두면 등급이 어떻게 되는지 찾아볼 때입니다. 회칙은 마크다운과 PDF로 나뉘어 있고, 세칙이나 학교 지침은 또 다른 파일에 있습니다.
+
+그래서 SSCCOps 관리자 화면에 규정 도우미를 붙였습니다. 오른쪽 아래 버튼을 눌러 질문하면 회칙과 세칙에서 근거를 찾아 서너 문장으로 답하고, 그 답이 어느 조항에서 나왔는지 원문과 함께 보여 줍니다. 9월 둘째 주에 기획을 쓰고 10월 첫 주에 마지막 결함을 고치기까지 한 달이 걸렸습니다. 이 글은 그동안 ssccops-server에서 내린 결정과, 직접 써 보고 나서야 보인 문제들의 기록입니다.
+
+<!-- truncate -->
+
+## 이런 걸 만들었습니다
+
+![규정 도우미 패널. 정회원이 되려면 어떻게 해야 하는지 묻자 두 가지 길을 답하고, 답변 근거로 회칙 제7조 6항의 원문 발췌 카드를 보여 줍니다](/img/blog/regulation-assistant-rag/panel-answer.png)
+
+*ssccops-web의 패널 코드를 그대로 옮겨 그린 화면입니다. 문서 이름과 날짜는 예시입니다.*
+
+화면에서 볼 곳은 세 군데입니다. 답변 위의 배지는 어느 문서를 근거로 읽었는지 알려 줍니다. 본문의 `[제7조]`는 그 문장이 어디서 나왔는지 가리키고, "답변 근거 보기"를 펼치면 같은 표시가 붙은 카드에 조 제목과 원문이 나옵니다.
+
+회원 자격에 관한 답변은 회칙 원문과 바로 대조할 수 있어야 했습니다. 그래서 답변을 만드는 것만큼 출처를 보여 주는 데 신경을 썼습니다.
+
+## 새 서버를 두지 않았습니다
+
+처음부터 정한 제약이 하나 있었습니다. 벡터 DB나 Redis처럼 따로 운영해야 하는 것을 늘리지 않는다는 것입니다. 동아리 서비스라 운영할 사람이 많지 않고, 규정 문서도 몇 건 되지 않습니다. 그래서 이미 쓰던 것으로 해결했습니다.
+
+| 필요한 것 | 쓴 것 |
+|---|---|
+| 벡터 검색 | 쓰던 PostgreSQL에 pgvector 확장 |
+| 원본 파일 | 쓰던 파일 저장소(Cloudflare R2) |
+| 임베딩과 답 생성 | Gemini API |
+| 색인 작업 큐 | 문서 테이블의 상태 컬럼 하나. 워커는 같은 프로세스 안에서 돕니다 |
+| 대화 기록, 질문 한도 | 애플리케이션 힙의 Caffeine 캐시 |
+
+```mermaid
+flowchart TB
+  subgraph web["관리자 화면 (ssccops-web)"]
+    direction LR
+    panel["규정 도우미 패널"]
+    settings["RAG 설정"]
+  end
+  subgraph server["ssccops-server"]
+    direction LR
+    query["질의"]
+    upload["업로드"]
+    worker["색인 워커"]
+  end
+  subgraph outside["서버 밖"]
+    direction LR
+    gemini["Gemini API<br/>임베딩 · 생성"]
+    pg[("PostgreSQL<br/>pgvector")]
+    files[("파일 저장소<br/>원본 파일")]
+  end
+  panel -- "질문 (SSE)" --> query
+  settings -- "업로드 · 재색인" --> upload
+  query --> gemini
+  query --> pg
+  upload --> files
+  upload --> pg
+  worker --> pg
+  worker --> files
+  worker --> gemini
+```
+
+벡터 인덱스(HNSW)도 만들지 않았습니다. 청크가 수천 개 수준이면 순차 스캔으로도 충분히 빠릅니다. 대신 적재할 수 있는 청크 수를 3,000개(임베딩으로 약 14MB)로 제한했습니다. 대화 기록과 질문 임베딩 캐시는 힙에 두는데, 대화 500개 기준으로 15MB 남짓입니다.
+
+임베딩 모델은 키를 넣고 두 후보를 직접 호출해 비교했습니다. 고르는 데 영향을 준 차이만 적으면 다음과 같습니다.
+
+| | gemini-embedding-001 | gemini-embedding-2 |
+|---|---|---|
+| 입력 상한 | 2,048 토큰 | 8,192 토큰 |
+| 768차원으로 받은 벡터 | 정규화되지 않음 (노름 0.5819) | 정규화됨 (노름 1.0) |
+| 문서용, 질문용 task type | 결과가 달라집니다 | 결과가 같습니다 |
+
+2를 골랐습니다. 긴 조문도 입력 상한에 걸리지 않고, 정규화를 따로 할 필요가 없었습니다. Spring AI 1.1.8의 Gemini 임베딩 모델은 task type을 요청에 싣지 않는데, 2는 task type과 상관없이 결과가 같아서 이 문제도 피할 수 있었습니다.
+
+이 밖에도 모델 클래스가 실제와 다른 차원 수(3072)를 돌려주거나, 목록에 보이는 채팅 모델(`gemini-2.5-flash`)이 새 키로는 404를 내는 등 문서와 실제 동작이 다른 곳이 몇 군데 있었습니다. 그래서 설정값은 하나씩 직접 호출해 확인했습니다.
+
+## 문서는 레포가 아니라 화면에서 올립니다
+
+처음 계획은 회칙을 마크다운으로 레포에 커밋하고 Gradle 태스크로 적재하는 것이었습니다. 두 가지 이유로 접었습니다. 회칙 개정은 총회에서 나오는데, 커밋으로 관리하면 개정을 반영할 수 있는 사람이 서버를 배포할 수 있는 사람뿐입니다. 그리고 참조해야 할 문서의 절반은 저희가 쓴 문서가 아닙니다. 학교 지침이나 세칙은 PDF와 DOCX로 옵니다.
+
+그래서 관리자 화면에 "RAG 설정"을 두고, 권한이 있는 운영진이 직접 문서를 올리도록 했습니다.
+
+![RAG 설정 화면. 등록 문서 5건, 색인 완료 3건, 총 청크 53개가 위에 있고, 아래 표에서 문서마다 색인 상태와 적용 상태가 따로 표시됩니다](/img/blog/regulation-assistant-rag/rag-settings.png)
+
+*이것도 웹 코드로 그린 화면입니다. 목록의 문서는 예시이고, 본문 폭에 맞추려고 표의 크기와 등록일 열은 뺐습니다.*
+
+업로드 요청에서는 파싱과 원본 보관까지만 하고, 시간이 오래 걸리는 임베딩은 같은 서버의 색인 워커가 뒤에서 처리합니다. 파싱을 요청 안에서 하기 때문에, 스캔본처럼 글자를 뽑을 수 없는 파일은 올리는 순간 거절됩니다.
+
+목록에 "상태"와 "적용"이 따로 있는 것이 이 화면의 요점입니다. 처음에는 한 컬럼으로 두려 했는데, 그러면 "색인은 끝났지만 아직 시행 전인 개정안"을 표현할 수 없습니다. 공교롭게도 첫 업로드 대상이 바로 그런 문서였습니다. 회칙 개정안의 부칙이 발효일을 개강총회 의결일로 비워 두고 있었습니다.
+
+```mermaid
+flowchart TB
+  subgraph idx["색인 진행 (워커가 기록)"]
+    direction LR
+    P["대기"] --> I["색인 중"] --> X["색인 완료"]
+    I --> F["실패"]
+  end
+  subgraph app["적용 여부 (운영진이 결정)"]
+    direction LR
+    D["미사용"] -- "답변에 사용" --> E["답변에 사용 중"]
+    E -- "답변에서 영구 제외" --> S["제외됨"]
+  end
+  idx ~~~ app
+```
+
+재색인은 문서를 다시 "대기"로 돌려 색인을 새로 하는 조작이고, "답변에 사용"은 색인이 끝난 문서에만 누를 수 있습니다. 질문에 쓰이는 문서는 "색인 완료"이면서 "답변에 사용 중"인 것뿐이고, 이 조건은 벡터 검색 필터에 바로 겁니다.
+
+색인이 실패해도 자동으로 다시 시도하지는 않습니다. 실패 원인 대부분이 무료 쿼터 소진이라, 재시도하면 쿼터만 더 빨리 쓰게 됩니다. 실패 사유는 목록에 남고, 운영진이 확인한 뒤 재색인을 누릅니다.
+
+## 회칙은 조 단위로 자릅니다
+
+RAG 예제를 따라 하면 보통 문서를 일정한 길이로 자릅니다. 회칙에 그대로 적용하면 청크가 조 경계를 넘습니다.
+
+![같은 조문을 두 가지로 자른 비교. 왼쪽 조 단위 청킹은 제7조를 389자와 443자 두 청크로 나누고, 오른쪽 600자 고정 길이 청킹의 세 번째 청크는 제7조 7항 문장 중간에서 시작해 제8조 9항까지 이어집니다](/img/blog/regulation-assistant-rag/chunking.png)
+
+오른쪽은 같은 조문을 평문 경로(600자, 앞 청크 끝 100자 겹침)에 넣어 실제로 잘라 본 결과입니다. 두 번째 청크는 제7조 머리에서 시작해 7항 1호에서 끝나고, 세 번째 청크는 7항 문장 한가운데("다음 각 호의 어느" 바로 뒤)에서 시작해 제8조 9항까지 이어집니다. 이 청크가 검색에 걸리면 답변은 제7조를 근거로 들면서 제8조의 문장을 보여 줄 수 있습니다.
+
+그래서 회칙은 조 경계를 기준으로 청크를 만들고, 긴 조만 항 경계에서 나눴습니다. 회칙 마크다운 파일에는 다음과 같은 형식을 정해 두었습니다.
+
+```markdown
+## 제2장 회원
+
+### 제7조 (회원의 구분) ⟨개정⟩
+
+회원의 구분은 아래와 같이 한다.
+
+- **1항** 본 회의 회원은 등급과 학적으로 구분한다. …
+- **5항** 활동회원은 준회원의 자격을 갖춘 자 중 …
+    - **1호** 스터디 또는 트랙의 스터디장·트랙장을 맡아 …
+
+> 해설 문단. 조문이 아니라 개정 이유를 적은 글입니다.
+```
+
+필요한 정보가 장, 조, 항의 구분이라 마크다운 AST를 쓰지 않고 줄 단위 규칙 다섯 개(장, 조, 항, 호, 개정 마커)로 처리했습니다. 실제 개정안을 넣어 보고 나서야 보인 것이 네 가지 있었습니다.
+
+| 문서에서 만난 것 | 어떻게 했나 |
+|---|---|
+| "제27조의2" 같은 가지 조번호 | 조번호를 `int` 하나로 두면 파싱이 실패하거나 제27조와 한 조가 됩니다. (27, 2) 두 값으로 다루고 표기는 원문 그대로 둡니다 |
+| 부칙에서 조번호가 1부터 다시 시작 | 본칙 제3조와 부칙 제3조가 둘 다 있습니다. 인용 키에 부칙 여부를 넣어 "부칙 제3조"로 구분합니다 |
+| 조문보다 긴 해설 블록 | 제7조는 조문 22줄에 해설이 8문단입니다. 넣으면 검색이 해설에 걸리고 발췌가 조문이 아니게 됩니다. 해설은 빼고 원본은 파일 저장소에 남깁니다 |
+| `⟨개정⟩`, `⟨신설⟩` 같은 개정 표시 | 임베딩할 텍스트에서는 지우고 메타데이터로 옮깁니다 |
+
+임베딩할 텍스트 맨 앞에는 장 제목을 붙입니다(`제2장 회원 · 제7조 (회원의 구분)`). "제28조 (설치)"만으로는 무엇을 설치하는지 알 수 없고, 이 조는 개정안에서 다른 장으로 옮겨 갔기 때문입니다. 긴 조를 항 경계에서 나눌 때는 나눈 묶음마다 이 머리를 다시 붙입니다. 목표 길이 450자는 개정안 전문으로 여러 번 재 보고 정했습니다. 이 값이면 조 36개가 청크 40개가 되고, 나뉘는 조는 제7, 8, 16, 17조 네 개입니다.
+
+나누는 코드는 짧습니다. 머리까지 합쳐 목표 길이 안에 들어오면 조 전체를 청크 하나로 두고, 넘을 때만 항을 하나씩 쌓다가 넘치기 직전에 끊습니다(`RegulationChunker`).
+
+```java
+static final int TARGET_CHUNK_CHARS = 450;
+
+private static List<String> bodies(
+        RegulationChapter chapter, RegulationArticle article) {
+    List<String> blocks = new ArrayList<>();
+    if (!article.preamble().isEmpty()) {
+        blocks.add(String.join("\n", article.preamble()));
+    }
+    for (RegulationClause clause : article.clauses()) {
+        blocks.add(clause.text());
+    }
+
+    int headerLength = heading(chapter, article).length() + 1;
+    String whole = String.join("\n", blocks);
+    // 항이 없거나 머리까지 450자 이내: 조 하나 = 청크 하나
+    if (article.clauses().isEmpty()
+            || headerLength + whole.length() <= TARGET_CHUNK_CHARS) {
+        return List.of(whole);
+    }
+
+    // 긴 조만 항 경계에서 나눔 (항 하나가 450자를 넘어도 자르지 않음)
+    List<String> bodies = new ArrayList<>();
+    StringBuilder current = new StringBuilder();
+    for (String block : blocks) {
+        if (!current.isEmpty()
+                && headerLength + current.length() + 1 + block.length()
+                        > TARGET_CHUNK_CHARS) {
+            bodies.add(current.toString());
+            current = new StringBuilder(block);
+            continue;
+        }
+        if (!current.isEmpty()) {
+            current.append('\n');
+        }
+        current.append(block);
+    }
+    bodies.add(current.toString());
+    return bodies;
+}
+```
+
+PDF와 DOCX는 Apache Tika로 평문과 쪽 경계를 뽑아 600자씩 자릅니다. 그런데 DOCX에는 쪽 번호가 없었습니다. 쪽 나눔은 워드가 화면에 그릴 때 계산하는 값이라 파일에 들어 있지 않고, 일부러 넣은 쪽 나눔도 Tika에서는 줄바꿈 하나로 나옵니다. 전부 1쪽으로 채우면 9쪽에 있는 문장을 찾으러 1쪽을 여는 사람이 생깁니다. 그래서 DOCX 답변에는 쪽 번호를 붙이지 않고 문서 이름만 표시했습니다.
+
+PDF의 OCR은 껐습니다. 켜 두면 tesseract가 설치된 환경에서만 OCR이 돌아서, 같은 파일이라도 서버 환경에 따라 뽑히는 내용이 달라집니다.
+
+## 근거가 없으면 답하지 않도록
+
+이 기능에서 가장 먼저 막아야 했던 것은 없는 조항을 지어내 답하는 일이었습니다. 그래서 근거가 없을 때 답하지 않게 하는 장치를 세 겹으로 두었습니다.
+
+```mermaid
+flowchart TD
+  search["조 지목 + 유사도 검색<br/>(답변에 쓰는 문서만)"]
+  search --> th{{"① 임계값을 넘는 발췌가 있는가"}}
+  th -- "없음" --> refuse["정해진 안내 문구<br/>(모델 호출 없음)"]
+  th -- "있음" --> gen["② 규칙 다섯 개와<br/>번호 붙인 발췌로 생성"]
+  gen --> mark{{"③ 첫 줄이 [근거없음]인가"}}
+  mark -- "예" --> refuse
+  mark -- "아니오" --> verify["③ 인용 번호 검사<br/>범위 밖 번호 삭제"]
+```
+
+첫째 겹은 모델을 아예 부르지 않는 것입니다. 유사도 임계값을 넘는 발췌가 하나도 없으면 프롬프트를 만들지 않고 정해진 문구를 돌려줍니다. 프롬프트에 "모르면 모른다고 하라"고 적어도 모델이 그 지시를 지키지 않는 경우가 있어서, 모델을 부르기 전에 서버에서 먼저 거릅니다.
+
+질의를 준비하는 메서드에서 이 판단은 모델 호출보다 앞에 있습니다(`AssistantServiceImpl.prepare`, 일부 생략).
+
+```java
+// 색인 완료이면서 답변에 사용 중인 문서만
+Map<Long, SearchableDocument> searchable = searchableDocuments();
+if (searchable.isEmpty()) {
+    return Prepared.refused(refuse(
+            memberId, "시행 중인 규정 문서가 없다", 0,
+            conversationId, timeline));
+}
+
+List<ArticleReference> articles = ArticleReference.references(
+        question, conversations.anchor(conversationId));
+List<RetrievedChunk> chunks =
+        retrieve(question, articles, searchable, chunkStore);
+if (chunks.isEmpty()) {
+    // 임계값을 넘는 발췌가 없으면 프롬프트를 만들지 않음
+    return Prepared.refused(refuse(
+            memberId, "임계값을 넘는 청크가 없다", 0,
+            conversationId, timeline));
+}
+```
+
+둘째 겹은 프롬프트의 규칙 다섯 개입니다. 발췌 밖의 지식을 쓰지 않는다, 모든 주장에 출처를 단다, 근거가 없으면 첫 줄에 `[근거없음]`만 쓴다, 승인이나 반려 같은 처리를 대신하지 않는다, 3~5문장으로 답한다는 것입니다. 사용자 질문과 문서 발췌는 블록을 나눠 넣고, 발췌는 지시가 아니라 참고 자료라고 시스템 프롬프트에 적었습니다. 도구 호출(tool calling)은 붙이지 않았습니다. 운영진이 올린 문서에 지시문처럼 생긴 문장이 섞여 있어도, 도구가 없으면 모델이 할 수 있는 일은 답변 문장을 쓰는 것뿐입니다.
+
+셋째 겹은 서버가 인용을 검사하는 것입니다. 여기서 인용 방식을 한 번 크게 바꿨습니다. 처음에는 모델이 `[제7조 6항]`처럼 조 번호를 직접 적었고, 서버는 답이 다 나온 뒤에 그 문자열을 실제 발췌와 대조했습니다. 지금은 프롬프트가 발췌마다 `--- 발췌 3 ---` 같은 번호를 찍어 주고, 모델은 대괄호에 그 번호만 넣습니다. 조 표기는 서버가 번호를 보고 붙입니다.
+
+```java
+// AssistantPrompt: 발췌마다 번호만 찍고, 조나 쪽 표기는 적어 주지 않음
+static String user(String question, List<RetrievedChunk> chunks) {
+    StringBuilder prompt = new StringBuilder("[문서 발췌]\n");
+    int number = 1;
+    for (RetrievedChunk chunk : chunks) {
+        prompt.append("--- 발췌 ")
+                .append(number++)
+                .append(" ---\n")
+                .append(chunk.text())
+                .append("\n\n");
+    }
+    return prompt.append("[사용자 질문]\n").append(question).toString();
+}
+```
+
+| | 조 번호를 직접 쓰던 때 | 발췌 번호만 쓰는 지금 |
+|---|---|---|
+| 모델이 쓸 수 있는 출처 표기 | 아무 조 번호나 쓸 수 있습니다 | 넣어 준 발췌 번호 1부터 N까지뿐입니다 |
+| 잘못된 출처를 거르는 시점 | 답이 다 나온 뒤 | 대괄호가 닫히는 즉시 |
+| 스트리밍 | 할 수 없습니다. 걸러 낼 글자를 이미 보낸 뒤입니다 | 할 수 있습니다 |
+
+이 검사는 번호가 실제로 넣어 준 발췌를 가리키는지만 확인합니다. 문장 내용이 그 발췌와 맞는지는 사람이 인용 카드의 원문을 보고 확인합니다.
+
+인용 방식을 바꾸면서 답을 SSE로 스트리밍할 수 있게 됐습니다. 전에는 답 한 건에 7~12초가 걸리는 동안 화면이 비어 있었습니다. 서버는 닫히지 않은 대괄호와 그 앞 공백만 잠시 보류했다가, 범위 밖 번호면 지우고 맞으면 그대로 보냅니다. 질문 한도 초과 같은 거절은 스트림을 열기 전에 판정해서, 글자가 나오다가 한도 초과로 바뀌는 일이 없도록 했습니다.
+
+스트리밍 중에는 조각이 올 때마다 아래 메서드가 대괄호를 찾아 판정합니다(`CitationVerifier.Session`, 일부 생략). 번호 검사는 `resolve` 한 곳뿐입니다.
+
+```java
+public String accept(String delta) {
+    if (refused) {
+        // [근거없음] 뒤는 내보내지 않음
+        return "";
+    }
+    pending.append(delta);
+
+    StringBuilder out = new StringBuilder();
+    // 닫힌 대괄호 [...]
+    Matcher marker = MARKER.matcher(pending);
+    int cursor = 0;
+    while (marker.find(cursor)) {
+        String token = marker.group(1).trim();
+        if (isRefusal(token)) {
+            // 아직 보내지 않은 글자까지 버림
+            return refuse();
+        }
+        VerifiedCitation citation = resolve(token);
+        if (citation != null) {
+            citations.putIfAbsent(Integer.valueOf(token), citation);
+            out.append(pending, cursor, marker.end());
+        } else if (looksLikeCitation(token)) {
+            // 범위 밖 번호, 옛 조나 쪽 표기: 앞 공백과 함께 지움
+            int blank = blankStartBefore(marker.start());
+            out.append(pending, cursor, Math.max(cursor, blank));
+            dropped++;
+        } else {
+            // [참고] 같은 평범한 대괄호
+            out.append(pending, cursor, marker.end());
+        }
+        cursor = marker.end();
+    }
+
+    // 닫히지 않은 대괄호는 보류
+    int safe = safeEnd(cursor);
+    out.append(pending, cursor, safe);
+    pending.delete(0, safe);
+    return emit(out.toString());
+}
+
+private VerifiedCitation resolve(String token) {
+    // 숫자 1~3자리만
+    if (!REFERENCE.matcher(token).matches()) {
+        return null;
+    }
+    int number = Integer.parseInt(token);
+    if (number < 1 || number > chunks.size()) {
+        return null;
+    }
+    RetrievedChunk chunk = chunks.get(number - 1);
+    return new VerifiedCitation(response(number, chunk), chunk.source());
+}
+```
+
+`[근거없음]` 표식은 실제로 겪은 일 때문에 생겼습니다. 처음에는 규칙 3이 "근거가 없으면 '근거를 찾지 못했습니다'라고 말한다"였습니다. 모델은 이 규칙을 지키면서 규칙 2도 성실하게 지켰습니다. 근거가 없다는 것도 하나의 주장이니 출처를 단 것입니다.
+
+> 규정 문서에서 회칙 제3조의 내용을 그대로 인용할 만한 근거를 찾지 못했습니다. … [1][2][3][4][5]
+
+인용 다섯 개가 전부 범위 안이라 검사를 통과했고, 서버는 인용이 하나라도 있으면 답한 것으로 셌습니다. 화면에는 근거 배지와 인용 카드 다섯 장이 달린 "찾지 못했습니다"가 그려졌습니다. 모델이 규칙을 어긴 것이 아니라 두 규칙이 부딪친 자리였습니다. 그래서 거절을 문장이 아니라 표식으로 받기로 했습니다. 모델은 첫 줄에 `[근거없음]` 하나만 쓰고, 서버는 그 표식을 보면 인용이 몇 개 붙었든 거절로 처리하고 서버가 정한 안내 문구를 내보냅니다.
+
+![코퍼스에 없는 내용인 동아리 티셔츠 주문처를 묻자, 근거 배지와 인용 카드 없이 관련 내용을 찾지 못했다는 안내 문구만 돌아옵니다](/img/blog/regulation-assistant-rag/panel-refusal.png)
+
+Spring AI의 `QuestionAnswerAdvisor`를 쓰지 않은 것도 첫째 겹 때문입니다. 어드바이저는 검색과 생성을 한 번에 처리해서, 임계값을 넘는 청크가 없으면 모델을 부르지 않는다는 판단을 넣을 자리가 없습니다. 검색 필터도 요청마다 DB에서 뽑은 문서 ID 목록이라 고정 문자열로 줄 수 없었습니다. 그래서 검색과 프롬프트 조립을 직접 작성했습니다.
+
+## 직접 써 보니 틀렸던 것
+
+CI의 골든셋 테스트가 전부 통과한 뒤에 화면에서 직접 물어보기 시작했습니다. 문제는 그때부터 하나씩 드러났습니다.
+
+### "회칙 제3조"를 물었는데 1위가 부칙 제4조
+
+"회칙 제3조는 무엇을 정하고 있어?"를 물으면 검색 1위가 부칙 제4조였습니다. 정답인 제3조는 8위라 상위 5개 밖이었습니다. 밀집 임베딩은 "제3조"를 식별자로 다루지 못하고, 조 번호보다 "회칙", "의결", "개정" 같은 주변 낱말로 비슷한 정도를 잽니다. 조 단위 청크가 평균 180자(가장 짧은 것은 38자)로 짧아서, 661자짜리 평문 청크와 같은 공간에서 비교하면 밀리기도 했습니다.
+
+질문이 조를 지목하면 그 조를 메타데이터(조 번호, 부칙 여부)로 직접 찾아 발췌 맨 앞에 넣도록 고쳤습니다. 이렇게 찾은 발췌는 유사도 판정을 거치지 않습니다. 사용자가 이미 조를 지목했으니 점수로 다시 거를 이유가 없다고 판단했습니다. 개정안의 조 36개를 하나씩 물었을 때 36개 모두 해당 조를 근거로 가져왔습니다.
+
+```java
+// AssistantServiceImpl: 지목한 조를 메타데이터로 직접 찾음
+// (가지 번호 조건은 생략)
+private SearchRequest pinnedArticle(
+        String question, List<Object> documentIds,
+        ArticleReference article) {
+
+    FilterExpressionBuilder builder = new FilterExpressionBuilder();
+    FilterExpressionBuilder.Op filter = builder.and(
+        builder.in(RagChunkStore.RAG_DOCUMENT_ID_KEY, documentIds),
+        builder.and(
+            builder.eq(RagChunkMetadata.ARTICLE_NUMBER, article.number()),
+            builder.eq(RagChunkMetadata.SUPPLEMENTARY,
+                article.supplementary())));
+    return SearchRequest.builder()
+        .query(question)
+        // 한 조가 여러 청크일 수 있어 3개까지
+        .topK(ARTICLE_PIN_LIMIT)
+        .similarityThreshold(SearchRequest.SIMILARITY_THRESHOLD_ACCEPT_ALL)
+        .filterExpression(filter.build())
+        .build();
+}
+```
+
+`documentIds`를 `List<Object>`로 받는 데는 이유가 있습니다. `FilterExpressionBuilder.in`에는 `(String, Object...)`와 `(String, List<Object>)` 두 오버로드가 있어서, `List<Long>`으로 넘기면 가변 인자 쪽이 골라집니다. 그러면 필터가 `ragDocId IN [[1, 2]]`가 되어 아무 청크도 걸리지 않습니다.
+
+같은 날 임계값도 0.5에서 0.35로 내렸습니다. 정당한 질문("제21조")의 점수가 0.4791인데 무관한 질문("파이썬")은 0.4910이라, 임계값 하나로는 둘을 가를 수 없었습니다. 지금은 모델의 `[근거없음]`이 거절을 주로 맡고, 임계값은 마지막 안전장치로 남겼습니다. 내리기 전에 무관한 질문에 발췌 다섯 개를 함께 보내도 모델이 거절하는 것을 확인했습니다.
+
+### 첫 글자가 나오기까지 5.3초
+
+스트리밍을 붙였는데도 첫 글자가 늦게 나왔습니다. 로그에는 전체 소요 시간 하나뿐이라 어느 구간이 느린지 알 수 없었습니다. 그래서 기존 로그 줄에 이정표 네 개를 붙였습니다. 모두 요청을 받은 때로부터 몇 ms가 지났는지 기록합니다.
+
+```text
+검색=904ms 첫수신=5272ms 첫송신=5276ms 소요=5732ms
+```
+
+![첫 글자까지 걸린 시간을 구간별로 나눈 막대. 사고 수준 기본값에서는 검색 0.9초, 생성 앞 침묵 4.4초로 첫 글자가 5.3초에 나오고, MINIMAL에서는 검색 0.8초, 침묵 1.9초로 2.7초에 나옵니다](/img/blog/regulation-assistant-rag/chart-latency.png)
+
+스트리밍은 처음부터 제대로 돌고 있었습니다. 답 전체가 나오는 데는 0.46초뿐이었고, 5.3초 중 4.4초는 모델이 첫 글자를 내기 전에 생각하는 시간이었습니다. 채팅 옵션에 사고 수준(thinking level)을 비워 두었더니 Spring AI가 요청에 그 설정을 아예 싣지 않아 모델 기본값으로 돌고 있었습니다. `MINIMAL`로 지정하자 첫 글자가 2.7초로 줄었습니다.
+
+그런데 다음 날 다른 문제가 나왔습니다. "회칙 제21조 전문을 토씨 하나 바꾸지 말고 옮겨 적어줘"를 `MINIMAL`에 네 번 물었더니 네 번 다 거절했습니다. 발췌에는 제21조가 들어 있었으니 검색 실패가 아니었습니다. 근거가 없으면 거절하라는 규칙 3과, 원문을 옮겨 달라는 요청은 거절하지 말고 간추려 답하라는 규칙 5가 부딪치는 자리에서 `MINIMAL`은 거절을 골랐습니다. `MEDIUM`은 같은 질문에 네 번 모두 답했습니다. 결국 사고 수준을 `MEDIUM`으로 올렸고, 대신 생성 시간은 2.5~3.3배 늘었습니다.
+
+```yaml
+spring:
+  ai:
+    google:
+      genai:
+        chat:
+          options:
+            model: ${GEMINI_CHAT_MODEL:gemini-3.5-flash-lite}
+            # 비워 두면 요청에 실리지 않아 모델 기본값으로 돌아감
+            thinking-level: ${GEMINI_CHAT_THINKING_LEVEL:MEDIUM}
+```
+
+사실 같은 날 앞서 `MEDIUM`으로 올리는 안을 측정해 보고 기각한 적이 있었습니다. 그때 잰 질문은 모두 내용을 묻는 질문이었고, 거기서는 `MEDIUM`이 두세 배 느리기만 하고 나은 점이 없었습니다. 두 실측은 시험지가 달랐습니다. 기각했던 표는 지우지 않고 남겨 두었습니다.
+
+### "그 다음 조는?"
+
+조 지목을 고친 날, 화면에서 이어 묻기를 해 보다가 또 막혔습니다. "회칙 제3조를 인용해줘"에 잘 답한 직후 "그 다음 조도 알려줘"를 물으면 거절이 돌아왔습니다. 검색 결과가 비었던 것도 아닙니다. 다섯 건이 왔는데 제10조, 제29조, 부칙 제3조, 제26조, 제14조였습니다. 제4조가 없으니 모델은 규칙대로 거절했습니다. 거절은 옳았고 검색이 틀렸습니다.
+
+밀집 임베딩에는 "+1"이 없습니다. 앞 질문을 검색어에 이어 붙여도 나오는 것은 제3조입니다. 그래서 검색어는 그대로 두고 조 지목을 넓혔습니다. 앞 턴이 실제로 인용한 조를 대화의 기준 조로 저장해 두고, "그 다음 조", "바로 앞 조", "그 조"는 기준 조에서 한 조씩 앞뒤로 계산합니다.
+
+기준 조를 앞 질문의 글자에서 뽑지 않고 답변의 인용에서 가져온 데는 이유가 있습니다. "정회원 승격 조건은?"처럼 조 번호 없이 묻는 질문이 많고, 그 근거가 제7조라는 것은 답변을 만든 뒤에야 알 수 있기 때문입니다.
+
+![이어 묻기. 회칙 제3조를 묻자 본부의 위치를 답하고, 이어서 그 다음 조는 무엇인지 묻자 제4조가 정한 동아리의 목적을 답합니다](/img/blog/regulation-assistant-rag/panel-followup.png)
+
+반대쪽도 조심했습니다. 조 지목으로 찾은 조는 임계값을 거치지 않아서, 잘못 잡으면 걸러 줄 장치가 없습니다. 그래서 "그 조건은?", "그 조직은?", "다음과 같이", "다음 각 호" 같은 말이 조 지목으로 잡히지 않는지 확인하는 테스트를, 제대로 푸는지 확인하는 테스트만큼 두었습니다.
+
+해석 규칙은 `ArticleReference` 한 곳에 있습니다(일부 생략).
+
+```java
+// "조" 뒤에는 조사, 부호, 공백, 끝만 허용 ("그 조건은?", "그 조직은?" 제외)
+private static final String BOUNDED_ARTICLE =
+        "조(?:항|문)?(?=[\\s은는이가을를의에도와과만?!.,]|$)";
+
+static ArticleReference parse(String question, ArticleReference anchor) {
+    // "제7조"처럼 조를 적었으면 그것이 우선
+    ArticleReference explicit = parse(question);
+    if (explicit != null || anchor == null || question == null) {
+        return explicit;
+    }
+    if (NEXT.matcher(question).find()) {        // "그 다음 조"
+        return anchor.shift(1);
+    }
+    if (PREVIOUS.matcher(question).find()) {    // "바로 앞 조"
+        return anchor.shift(-1);
+    }
+    return SAME.matcher(question).find() ? anchor : null;   // "그 조"
+}
+
+private ArticleReference shift(int step) {
+    int moved = number + step;
+    // 가지 번호는 버리고 부칙 여부는 유지: 부칙 제3조의 다음은 부칙 제4조
+    return moved < 1
+            ? null
+            : new ArticleReference(moved, null, supplementary);
+}
+```
+
+이 문제는 CI의 골든셋이 잡지 못했습니다. 골든셋은 질문 순서에 따라 지표가 흔들리지 않도록 일부러 단발 질문으로만 짰고, 그래서 이어 묻기는 애초에 확인하지 않았습니다. 실제 임베딩과 로컬 DB로 도는 벤치마크(`./gradlew ragBench`)를 따로 만들고, 대화 단위 질문 세트를 붙여 고치기 전후를 측정했습니다.
+
+![질문 군별 검색 통과를 고치기 전과 후로 비교한 덤벨 차트. 이어 묻기가 6/11에서 11/11로, 조 둘 지목이 1/2에서 2/2로 오르고, 합계는 19/26에서 25/26이 됩니다. 조 지목, 내용 질문, 평문 문서는 그대로입니다](/img/blog/regulation-assistant-rag/chart-bench.png)
+
+### Gemini를 기다리는 내내 DB 커넥션을 쥐고 있었습니다
+
+마지막 문제는 기능을 배포한 뒤에 찾았습니다. 서비스 코드에서 트랜잭션을 아무리 좁혀도, 질문 한 건이 Gemini 응답을 기다리는 내내 DB 커넥션을 쥐고 있었습니다. SSE라면 스트림이 닫힐 때까지였습니다. 원인은 Spring Boot에서 기본으로 켜져 있는 OSIV(open-in-view)였습니다. 요청 안에서 처음 잡은 커넥션을 응답이 끝날 때까지 놓지 않습니다. 업로드도 Tika가 파일을 읽는 동안 커넥션을 묶고 있었으니, 파싱을 트랜잭션 밖으로 빼 둔 이전 수정은 사실상 효과가 없었던 셈입니다.
+
+`spring.jpa.open-in-view: false`로 끄고, 모델이 불리는 순간 Hikari의 활성 커넥션이 0인지 확인하는 테스트를 붙였습니다. 누군가 OSIV를 다시 켜면 이 테스트가 실패합니다.
+
+```java
+// AssistantConnectionHoldTest (일부 생략)
+@BeforeEach
+void reset() {
+    // 모델이 불리는 순간 Hikari의 활성 커넥션 수를 기록
+    chatModel.observeCalls(
+            () -> activeWhileGenerating.set(activeConnections()));
+}
+
+@Test
+void doesNotHoldAConnectionWhileTheModelAnswers() throws Exception {
+    // 인증 헤더와 질문 본문은 생략
+    mockMvc.perform(post("/v1/assistant/queries") /* … */)
+            .andExpect(status().isOk());
+
+    assertThat(activeWhileGenerating.get())
+            .as("시행 중인 문서를 읽은 커넥션이 "
+                    + "모델 호출 전에 반납됐어야 한다")
+            .isZero();
+}
+```
+
+Gemini 호출 쪽에도 비슷한 문제가 있었습니다. google-genai SDK는 기본 타임아웃이 없고 자체 재시도가 숨어 있어서, 20초로 걸어 둔 상한이 실제로는 35~43초가 됐습니다. 상한을 40초로 늘리고 재시도를 2회로 줄였습니다.
+
+## 어떻게 측정했는지
+
+측정은 두 가지로 나눴습니다. CI에서는 매번 골든셋이 돕니다. 실제 임베딩 대신 글자 bigram TF-IDF로 만든 스텁을 써서 결과가 늘 같고 쿼터를 쓰지 않습니다.
+
+| 지표 | 목표 | 결과 |
+|---|---|---|
+| 검색 적중 (hit@5) | 0.9 이상 | 1.00 (10/10) |
+| 인용 정확도 | 0.95 이상 | 1.00 (10/10) |
+| 올바른 거절 | 1.0 | 1.00 (3/3), 모델 호출 0번 |
+| 서버 쪽 처리 시간 p95 (모델 왕복 제외) | 5초 미만 | 3ms |
+
+다만 이 점수로 운영 임계값을 정할 수는 없습니다. 낱말이 겹치기만 해도 점수가 오르기 때문입니다. "동아리 티셔츠는 어디서 주문하나요?"가 제30조(동아리 등록)에서 0.0953을 받아, 답해야 하는 질문의 최저 점수(0.0371)보다 높습니다. 이 점수 관계도 테스트에서 확인하도록 했습니다.
+
+실제 임베딩을 썼을 때의 검색 성능은 `ragBench`로 측정합니다. 로컬 DB에 적재한 문서와 실제 Gemini 임베딩을 쓰고, 운영과 같은 코드로 질문합니다. 채팅 모델만은 받은 발췌 번호를 전부 인용하는 스텁으로 바꿔서, 응답의 인용 목록이 곧 검색 결과가 되도록 했습니다. 질문 세트를 한 번 돌리면 28턴이라, 채팅 모델까지 실제로 부르면 무료 쿼터 하루치를 다 쓰게 됩니다.
+
+## 아직 남은 것
+
+- 벤치마크에서 한 건이 아직 틀립니다. "휴학하면 정회원 자격을 잃나요?"에 제7조는 오지만 제8조 8항("이 권리는 학적과 무관하다")이 오지 않습니다. 조 번호가 없는 질문이라 조 지목이 닿지 않고, 밀집 검색만으로 두 조를 함께 가져와야 하는 문제입니다.
+- 재색인을 누르면 끝날 때까지 그 문서는 답변에서 빠집니다. 색인 중인 문서는 검색 조건(색인 완료)을 만족하지 않기 때문입니다. 옛 청크로 계속 답하게 하려면 검색 조건 자체를 바꿔야 해서 지금은 그대로 두었고, 운영진께는 질문이 몰리는 시간을 피해 재색인해 달라고 안내했습니다.
+- 같은 규정의 옛 문서와 새 문서가 둘 다 "답변에 사용 중"이면 도우미가 서로 어긋나는 조항을 인용할 수 있습니다. 문서마다 판본을 매기는 기능을 일찍 걷어 냈기 때문에, 지금은 운영진이 목록 화면에서 확인하는 것 말고는 막을 방법이 없습니다.
+
+돌아보면 고친 것 대부분이 프롬프트에 규칙을 더 적는 대신 코드에서 막는 쪽이었습니다. 모델을 부르지 않는 거절, 발췌 번호만 쓰게 한 인용, `[근거없음]` 표식이 그렇습니다.
+
+규정 도우미 서버 코드는 [ssccops-server의 `domain/assistant`](https://github.com/SoongSilComputingClub/ssccops-server/tree/develop/src/main/java/org/sscc/ssccopsserver/domain/assistant)에 있습니다. 운영진이 쓰는 방법은 사용 설명서의 [규정 도우미](/guide/account/assistant)와 [RAG 설정](/guide/admin/rag-settings)에 정리해 두었습니다.
