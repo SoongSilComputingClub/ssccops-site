@@ -39,6 +39,7 @@ blog/                 글 (파일 하나가 글 하나), authors.yml
 releases/             릴리즈 노트 (/releases). 두 번째 블로그, _template.md가 틀
 src/pages/index.tsx   랜딩
 src/theme/BlogPostItem/  블로그 글 아래 giscus 댓글
+src/theme/Mermaid/       색 모드가 바뀌면 Mermaid 그림을 새로 마운트한다(같은 id로 다시 그리면 그림이 빈다)
 src/css/custom.css    전역 스타일 (사이트 색, Pretendard 글꼴, 한국어 어절 단위 줄바꿈)
 plugins/og-image/     링크 공유 카드(OG 이미지)를 빌드 때 굽는다. fonts/에 Pretendard OTF 두 벌과 OFL
 i18n/ko/code.json     화면 문구 번역 (검색 플러그인에 한국어가 없어 여기서 채운다)
