@@ -1,5 +1,5 @@
 name: "📝 Docs"
-description: "블로그 글과 사용 설명서를 쓰거나 고치기"
+description: "블로그 글, 릴리즈 노트, 사용 설명서, 개발 참여, 장애 대응 문서를 쓰거나 고치기"
 title: "[DOCS] "
 labels: ["chore"]
 type: SubTask
@@ -22,7 +22,11 @@ body:
       options:
         - "새 블로그 글"
         - "이미 게시된 블로그 글 고치기"
-        - "사용 설명서 (메타 레포에서 한 절씩 옮겨 오는 중)"
+        - "릴리즈 노트"
+        - "사용 설명서"
+        - "개발 참여"
+        - "장애 대응"
+        - "여러 곳"
     validations:
       required: true
 

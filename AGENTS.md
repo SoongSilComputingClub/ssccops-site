@@ -147,7 +147,7 @@ server, web과 같다. 워크플로(`issue-branch-creator`, `issue-labeler`, `pr
   | `[FIX]` | 깨진 링크, 잘못된 화면이나 동작 | `fix`, `fix/#N` |
   | `[REFACTOR]` | 주소와 화면은 그대로 두고 구조만 바꾸기 | `refactor`, `refactor/#N` |
   | `[CHORE]` | 설정, 빌드, 의존성, CI, 작업 규칙 | `chore`, `chore/#N` |
-  | `[DOCS]` | 블로그 글과 설명서 쓰기, 고치기 | `chore`, `chore/#N` |
+  | `[DOCS]` | 블로그 글, 릴리즈 노트, 설명서, 개발 참여, 장애 대응 문서 쓰기, 고치기 | `chore`, `chore/#N` |
 
   이슈 유형은 세 레포 모두 feat, fix, refactor, chore 넷뿐이라 글 작업도 `chore`로 묶인다. 이 레포만 `docs` 유형이나
   라벨을 따로 두지 않는다. 글 작업만 보고 싶으면 제목으로 거른다(`is:issue "[DOCS]" in:title`).

@@ -1,6 +1,6 @@
 ---
 title: 커밋, 브랜치, PR 규칙
-description: 이슈 유형과 커밋 타입의 차이, 커밋 메시지와 PR 제목 형식, PR 본문의 근거 줄, 서버 레포의 git 훅을 정리합니다.
+description: 이슈 유형과 커밋 타입의 차이, 커밋 메시지와 PR 제목 형식, PR 본문의 근거 줄을 정리합니다.
 sidebar_position: 2
 ---
 
@@ -22,15 +22,7 @@ sidebar_position: 2
 
 문서, 테스트, 스타일, CI 작업의 이슈는 모두 `[CHORE]`로 엽니다. `[DOCS]`나 `[CICD]` 같은 접두어로 열어도 봇이 `chore`로 받습니다. 넷으로 못 박은 이유는 같은 표가 워크플로 넷(`issue-labeler`, `issue-branch-creator`, `pr-labeler`, `pr-guard`)에 흩어져 있어서, 하나만 고치면 이슈와 PR의 라벨이 갈라지기 때문입니다.
 
-**커밋 타입은 더 많습니다.** 레포마다 목록이 조금 다릅니다.
-
-| 레포 | 커밋 타입 | 수 |
-|---|---|---|
-| ssccops-server | `feat`, `fix`, `refactor`, `design`, `style`, `docs`, `test`, `chore`, `init`, `rename`, `remove`, `cicd`, `hotfix` | 13 |
-| ssccops-web | `feat`, `fix`, `refactor`, `design`, `style`, `docs`, `test`, `chore`, `init`, `rename`, `remove`, `cicd` | 12 |
-| ssccops-site | `feat`, `fix`, `refactor`, `design`, `style`, `docs`, `test`, `chore`, `init`, `rename`, `remove`, `cicd` | 12 |
-
-차이는 `hotfix` 하나입니다. 서버의 `AGENTS.md`에만 있고 웹과 사이트의 `AGENTS.md`에는 없습니다. 어느 쪽에 맞출지는 정해지지 않았습니다 `[확인 필요]`. 그 레포의 목록을 따르면 됩니다.
+**커밋 타입은 더 많습니다.** 세 레포 모두 같은 열두 가지를 씁니다: `feat`, `fix`, `refactor`, `design`, `style`, `docs`, `test`, `chore`, `init`, `rename`, `remove`, `cicd`.
 
 그래서 이슈는 `[CHORE]`인데 커밋은 `docs(agents): …`인 것이 정상입니다. PR의 타입 라벨은 연결된 이슈의 라벨에서만 옵니다(`pr-labeler.yml`). 커밋 타입은 라벨에 영향을 주지 않고, 지키는 이유는 `git log`가 읽히게 하기 위해서입니다.
 
@@ -114,26 +106,9 @@ chore(config): 사이트 이름, 주소, 언어와 블로그 규칙을 설정한
 - 기능과 수정 PR은 **Squash and merge**로 `develop`에 들어갑니다.
 - `develop → main` 릴리즈 PR은 일반 merge commit으로 머지합니다. squash하면 릴리즈에 무엇이 들어갔는지 사라지기 때문입니다. 사이트 레포에는 `main`이 없습니다.
 
-## 서버 레포의 git 훅
+## git 훅
 
-`ssccops-server`의 `.husky/` 폴더에 훅 둘이 있습니다. 실제로 하는 일은 이것뿐입니다.
-
-**`pre-commit`**
-
-- 현재 브랜치가 `main`, `master`, `develop`이면 «직접 커밋할 수 없습니다»를 출력하고 커밋을 멈춥니다. 이때 안내 문구가 `feat/#nn-XXX` 형식의 브랜치를 쓰라고 하는데, 지금의 브랜치 형식은 `feat/#nn`입니다.
-- 그 밖의 브랜치에서는 `pnpm exec lint-staged`를 부릅니다. `.lintstagedrc`는 스테이징된 `*.java` 파일이 있으면 `./gradlew spotlessApply checkstyleMain checkstyleTest --daemon`을 돌리게 되어 있습니다.
-
-**`prepare-commit-msg`**
-
-- 브랜치 이름에서 첫 `#숫자`를 꺼내, 커밋 메시지 첫 줄에 그 번호가 없으면 맨 앞에 붙입니다. `feat/#32`에서 `feat: Add login`으로 커밋하면 `#32 feat: Add login`이 됩니다.
-- 이미 번호가 있으면 건드리지 않고, 브랜치에 번호가 없으면 아무것도 하지 않습니다.
-
-알아 둘 점이 둘 있습니다.
-
-- 훅을 켜는 설정은 레포에 없습니다. 서버 레포에는 `package.json`이 없어 husky를 설치하는 단계가 없고, `core.hooksPath`를 정하는 스크립트도 찾지 못했습니다. 훅을 쓰려면 각자 켜야 하는 것으로 보입니다. 정해진 방법은 `[확인 필요]`입니다.
-- `pre-commit`은 Node와 pnpm이 있어야 합니다. `lint-staged`를 `pnpm exec`로 부르기 때문입니다. 훅을 켰는데 pnpm이 없으면 커밋이 실패합니다.
-
-웹과 사이트 레포에는 git 훅이 없습니다.
+세 레포 모두 git 훅을 두지 않습니다. 커밋할 때 자동으로 도는 검사가 없으니, PR을 올리기 전에 [CI 검사](./ci.md)의 명령을 로컬에서 먼저 돌립니다. 커밋 메시지의 `#이슈번호`도 직접 적습니다.
 
 ## 다음 읽을 것
 
