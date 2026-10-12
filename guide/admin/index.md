@@ -12,7 +12,7 @@ description: 운영진이 쓰는 앱입니다. 업무와 승인, 회원 명부�
 | 묶음 | 페이지 |
 |---|---|
 | 홈 · 업무 | [운영 대시보드](operations/dashboard.mdx) · [운영 통합 · 등록](operations/overview.mdx) · [업무](operations/works.mdx) · [하위 업무](operations/sub-works.mdx) · [승인함](operations/approvals.mdx) |
-| 회원 | [회원 명부 · 상세](members/roster.mdx) · [CSV 회원 이관](members/csv-import.mdx) · [역할 · 권한](members/roles.mdx) |
+| 회원 | [회원 명부 · 상세](members/roster.mdx) · [CSV 회원 이관](members/csv-import.mdx) · [회원명부 내보내기](members/roster-export.mdx) · [역할 · 권한](members/roles.mdx) |
 | 폼 | [폼 관리 · 편집기](forms/manage.mdx) · [시스템 폼 목록](forms/system-forms.mdx) · [응답 확인](forms/responses.mdx) · [공개 폼(응답자 화면)](forms/public-form.mdx) |
 | 행사 | [행사 관리](events/manage.mdx) · [신청 심사 · 참가자](events/participants.mdx) |
 | 콘텐츠 | [페이지 · 포스트](content.mdx) |

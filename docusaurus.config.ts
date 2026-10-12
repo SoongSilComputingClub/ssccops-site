@@ -71,7 +71,7 @@ const config: Config = {
     [
       'classic',
       {
-        // 사용 설명서. 옛 설명서(guide.sscc-ssu.com)는 guide/index.md 한 곳에서만 안내한다(ssccops ADR-0061).
+        // 사용 설명서(ssccops ADR-0061). 옛 한 장짜리 설명서의 내용은 모두 이리로 옮겼다.
         docs: {
           path: 'guide',
           routeBasePath: 'guide',

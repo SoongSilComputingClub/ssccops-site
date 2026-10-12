@@ -2,7 +2,7 @@ import {useState, type ReactNode} from 'react';
 import {Badge, MockFrame, Progress} from '../..';
 
 type Program = {
-  status: '승인' | '진행 중' | '수료';
+  status: '승인' | '진행 중' | '수료' | '폐지';
   kind: '스터디' | '프로젝트' | '트랙';
   title: string;
   leader: string;
@@ -44,7 +44,7 @@ export function ProgramListMock(): ReactNode {
             style={{background: 'var(--app-surface)', padding: 16, width: '100%', textAlign: 'left'}}
             onClick={() =>
               setFeedback(
-                `«${p.title}» 활동 상세로 갑니다. 커리큘럼 대비 진행 · 회차 이력 · 팀원 명단 · 평균 출석률을 봅니다. 회차 기록을 고치지는 않습니다 — 기록은 ${p.leader.split(' ')[0]}이 쓰고, 국장은 회차 · 출석 승인에서 처리합니다.`,
+                `«${p.title}» 활동 상세로 갑니다. 승인 회차, 진행률(승인된 회차 ÷ 커리큘럼 항목 수), 커리큘럼 대비 진행, 팀원 명단을 봅니다. 회차 기록을 고치지는 않습니다. 기록은 ${p.leader.split(' ')[0]}이 쓰고, 국장은 회차 · 출석 승인에서 처리합니다.`,
               )
             }>
             <div style={{display: 'flex', gap: 5, marginBottom: 8}}>

@@ -12,11 +12,7 @@ sidebar_position: 1
 - **대상**: 운영진 · 스터디장 · 일반 회원
 - **로그인**: Google 계정 (Supabase Auth)
 
-:::note[설명서를 옮겼습니다]
-
-[지금까지 쓰던 설명서](https://guide.sscc-ssu.com)의 내용을 이 사이트로 모두 옮겼습니다. 설명서가 판마다 어떻게 바뀌었는지는 [설명서 개정 이력](reference/changelog.md)에 있습니다.
-
-:::
+설명서가 판마다 어떻게 바뀌었는지는 [설명서 개정 이력](reference/changelog.md)에 있습니다.
 
 ## 세 개의 앱
 
