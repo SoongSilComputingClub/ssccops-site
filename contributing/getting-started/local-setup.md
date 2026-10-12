@@ -23,10 +23,6 @@ sidebar_position: 3
 
 웹 레포에는 `.nvmrc`가 없습니다. Node 버전은 위의 README와 CI 값을 따릅니다.
 
-서버 레포의 `.husky/pre-commit` 훅은 `develop`, `main` 브랜치에서의 직접 커밋을 막은 뒤 `pnpm exec lint-staged`를 부르고, lint-staged는 커밋에 Java 파일이 있으면 `./gradlew spotlessApply checkstyleMain checkstyleTest`를 돌립니다(`.lintstagedrc`). 그래서 이 훅을 쓰려면 서버 작업에도 pnpm이 필요합니다.
-
-다만 서버 레포에는 `package.json`이 없어, 훅을 어떻게 켜고 lint-staged를 어디서 받는지는 `[확인 필요]`입니다.
-
 ## 접속 정보는 운영진에게 받습니다
 
 서버와 웹 모두 Supabase 프로젝트 값이 있어야 로그인과 토큰 검증이 됩니다. 서버의 `SUPABASE_URL`과 웹 세 앱의 `NEXT_PUBLIC_SUPABASE_URL`은 **모두 같은 프로젝트**를 가리켜야 합니다. 같은 계정으로 로그인한 사람이 서버에서 같은 회원으로 식별되어야 하기 때문입니다.
@@ -46,9 +42,11 @@ docker compose up postgres    # DB만 컨테이너로 띄웁니다
 - 서버 포트는 `PORT`(기본 `8080`)입니다. 로컬 프로필은 `SPRING_PROFILES_ACTIVE=local`입니다.
 - 스키마는 Flyway 마이그레이션(`src/main/resources/db/migration`)이 만듭니다. 빈 DB면 첫 기동에서 V1부터 전부 돕니다.
 
-:::warning[확인 필요]
+:::warning[로컬 DB 이미지에 pgvector가 없습니다]
 
-`docker-compose.yml`의 DB 이미지는 `postgres:17`인데, 마이그레이션 `V10__create_assistant_tables.sql`은 `CREATE EXTENSION IF NOT EXISTS vector`(pgvector)를 실행합니다. 서버 테스트의 Testcontainers는 `pgvector/pgvector:pg17` 이미지를 씁니다. 기본 `postgres:17` 이미지로 빈 DB에서 첫 기동이 통과하는지는 아직 확인하지 못했습니다. 첫 기동에서 `vector` 확장 오류가 나면 이 부분을 이슈로 알려 주세요.
+`docker-compose.yml`의 DB 이미지는 `postgres:17`인데, 마이그레이션 `V10__create_assistant_tables.sql`은 `CREATE EXTENSION IF NOT EXISTS vector`(pgvector)를 실행합니다. 공식 `postgres:17` 이미지에는 pgvector가 들어 있지 않아서, **빈 DB에서 처음 띄우면 V10에서 멈춥니다.**
+
+compose가 고쳐지기 전까지는 DB 이미지를 서버 테스트(Testcontainers)와 같은 `pgvector/pgvector:pg17`로 바꿔 띄웁니다. 이미 V10까지 적용된 DB라면 그대로 써도 됩니다.
 
 :::
 

@@ -12,7 +12,7 @@ body:
         생성 후 상단 **Parent issue**에서 `ssccops`의 Story·Task를 연결하세요 (cross-repo 가능) —
         Epic에 닿지 않는 이슈는 어디에도 잡히지 않습니다.
 
-        **블로그 글과 설명서는 📝 Docs 템플릿을 쓰세요.**
+        **블로그 글, 릴리즈 노트, 설명서 같은 문서 작업은 📝 Docs 템플릿을 쓰세요.**
 
   - type: dropdown
     id: target
