@@ -5,9 +5,9 @@ type Flag = '마감임박' | '지연';
 
 type MyRow = {
   name: string;
-  stage: '기획' | '진행' | '검토';
+  stage: '기획' | '진행' | '검토' | '완료';
   due: string;
-  flag: Flag;
+  flag?: Flag;
   progress: number;
 };
 
@@ -16,9 +16,19 @@ const MY_ROWS: MyRow[] = [
   {name: '부스 배치도 기획', stage: '기획', due: '8월 19일', flag: '마감임박', progress: 0},
   // «지연» 칩을 눌러 볼 수 있게 더한 예시 행. 옛 그림의 «3건»과 맞는다.
   {name: '현수막 주문', stage: '진행', due: '8월 12일', flag: '지연', progress: 60},
+  // «완료» 칩을 눌러 볼 수 있게 더한 예시 행. 처음 화면(«미완료»)에는 나오지 않는다.
+  {name: '신입회원 OT 장소 대관', stage: '완료', due: '8월 10일', progress: 100},
 ];
 
-const MY_CHIPS = ['전체', '마감임박', '지연'] as const;
+const MY_CHIPS = ['미완료', '마감임박', '지연', '완료', '전체'] as const;
+type MyChip = (typeof MY_CHIPS)[number];
+
+function matches(r: MyRow, c: MyChip): boolean {
+  if (c === '전체') return true;
+  if (c === '미완료') return r.stage !== '완료';
+  if (c === '완료') return r.stage === '완료';
+  return r.flag === c;
+}
 
 /** gm-plain이 지우는 mk-row의 줄, 여백, 글자를 버튼 행에 되돌린다 */
 const ROW_BUTTON: CSSProperties = {
@@ -39,24 +49,27 @@ const BADGE_MEANING: Record<Flag | 'D-DAY' | 'D-1', string> = {
 
 /**
  * 운영 대시보드 — /dashboard.
- * 설명서의 영역 표(칩으로 거르기, 승인 대기 행을 누르면 승인함, 승인 대기 카드는 WORK_MANAGE)와 «배지의 뜻» 표를 따른다.
+ * 설명서의 영역 표(처음에는 «미완료», 칩으로 거르기, 승인 대기 행을 누르면 승인함, 승인 대기 카드는 WORK_MANAGE)와
+ * «배지의 뜻» 표를 따른다.
  */
 export function DashboardMock(): ReactNode {
-  const [chip, setChip] = useState<(typeof MY_CHIPS)[number]>('전체');
+  const [chip, setChip] = useState<MyChip>('미완료');
   const [canManage, setCanManage] = useState(true);
   const [feedback, setFeedback] = useState<ReactNode>();
 
-  const rows = MY_ROWS.filter((r) => chip === '전체' || r.flag === chip);
+  const rows = MY_ROWS.filter((r) => matches(r, chip));
   const myCols = '2fr 1fr 1fr 1.2fr';
   const approvalCols = '2fr .8fr .8fr .8fr';
 
-  const pickChip = (c: (typeof MY_CHIPS)[number]) => {
+  const pickChip = (c: MyChip) => {
     setChip(c);
-    const n = MY_ROWS.filter((r) => c === '전체' || r.flag === c).length;
+    const n = MY_ROWS.filter((r) => matches(r, c)).length;
     setFeedback(
       c === '전체'
-        ? `«전체» 칩입니다. 담당자가 나인 하위 업무 ${n}건을 모두 보여 줍니다.`
-        : `«${c}» 칩을 켰습니다. 담당자가 나인 하위 업무 가운데 ${n}건만 남습니다.`,
+        ? `«전체» 칩입니다. 끝난 것까지 담당자가 나인 하위 업무 ${n}건을 모두 보여 줍니다.`
+        : c === '미완료'
+          ? `«미완료» 칩입니다. 처음 화면이 이것입니다. 기획, 진행, 검토 단계의 하위 업무 ${n}건만 보여 줍니다.`
+          : `«${c}» 칩을 켰습니다. 담당자가 나인 하위 업무 가운데 ${n}건만 남습니다.`,
     );
   };
 
@@ -68,7 +81,7 @@ export function DashboardMock(): ReactNode {
       hint="«내 업무 목록»의 칩을 눌러 걸러 보고, 승인 대기 행과 배지도 눌러 보세요."
       feedback={feedback}
       onReset={() => {
-        setChip('전체');
+        setChip('미완료');
         setCanManage(true);
         setFeedback(undefined);
       }}
@@ -143,7 +156,7 @@ export function DashboardMock(): ReactNode {
       </div>
       <div className="mk-card">
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12}}>
-          <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap'}}>
             <span style={{fontSize: 15, fontWeight: 600, color: 'var(--app-ink)'}}>내 업무 목록</span>
             {MY_CHIPS.map((c) => (
               <Chip key={c} active={chip === c} onClick={() => pickChip(c)}>
@@ -167,9 +180,11 @@ export function DashboardMock(): ReactNode {
             </span>
             <span>
               {r.due}{' '}
-              <button type="button" className="gm-plain" style={{marginLeft: 4}} onClick={() => explain(r.flag)}>
-                <Badge tone={r.flag === '지연' ? 'outline-red' : 'outline-accent'}>{r.flag}</Badge>
-              </button>
+              {r.flag && (
+                <button type="button" className="gm-plain" style={{marginLeft: 4}} onClick={() => explain(r.flag!)}>
+                  <Badge tone={r.flag === '지연' ? 'outline-red' : 'outline-accent'}>{r.flag}</Badge>
+                </button>
+              )}
             </span>
             <span style={{display: 'flex', alignItems: 'center', gap: 8}}>
               <Progress value={r.progress} />
