@@ -167,6 +167,52 @@ export function Progress({value, danger, style}: {value: number; danger?: boolea
   );
 }
 
+/** 바이트를 제품 화면과 같은 «12.3MB» 표기로. 1024 단위, MB는 소수 한 자리이되 .0은 뗀다 */
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes}B`;
+  const kb = Math.round(bytes / 1024);
+  if (kb < 1024) return `${kb}KB`;
+  return `${Number((bytes / (1024 * 1024)).toFixed(1))}MB`;
+}
+
+/**
+ * 첨부 파일 한 줄 — 이름 · 크기 · 올린 시각 · 내려받기 (+ 지우기).
+ * 기획안 첨부 자료가 학술 앱과 운영관리에서 같은 줄로 선다. onRemove가 없으면 읽기 전용이다.
+ */
+export function FileRow({
+  name,
+  size,
+  uploadedAt,
+  onDownload,
+  onRemove,
+}: {
+  name: string;
+  size: number;
+  uploadedAt: string;
+  onDownload: () => void;
+  onRemove?: () => void;
+}): ReactNode {
+  const button: CSSProperties = {fontSize: 12, padding: '5px 10px', flexShrink: 0};
+  return (
+    <div style={{display: 'flex', alignItems: 'center', gap: 8, padding: '9px 0', borderTop: '1px solid var(--app-line)'}}>
+      <div style={{minWidth: 0, flex: 1}}>
+        <div style={{fontSize: 13, color: 'var(--app-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{name}</div>
+        <div style={{fontSize: 11.5, color: 'var(--app-n500)', marginTop: 2}}>
+          {formatFileSize(size)} · {uploadedAt}
+        </div>
+      </div>
+      <Btn variant="ghost" style={button} onClick={onDownload}>
+        내려받기
+      </Btn>
+      {onRemove && (
+        <Btn variant="ghost-danger" style={button} onClick={onRemove}>
+          지우기
+        </Btn>
+      )}
+    </div>
+  );
+}
+
 /** 체크칸. onToggle이 없으면 그림으로만 그린다 */
 export function Check({on, onToggle, label, disabled, title}: {on: boolean; onToggle?: () => void; label: ReactNode; disabled?: boolean; title?: string}): ReactNode {
   const box = <span className={on ? 'gm-check on' : 'gm-check'}>{on ? '✓' : ''}</span>;

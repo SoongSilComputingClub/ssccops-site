@@ -1,5 +1,5 @@
 import {useState, type ReactNode} from 'react';
-import {Badge, Btn, MockFrame} from '..';
+import {Badge, Btn, FileRow, formatFileSize, MockFrame} from '..';
 
 type ProposalStatus = '수정요청' | '제출' | '승인' | '반려';
 
@@ -154,6 +154,179 @@ export function ProposalDetailMock(): ReactNode {
           </Btn>
         )}
       </div>
+    </MockFrame>
+  );
+}
+
+/* ============ 첨부 자료 ============ */
+
+type Attachment = {id: number; name: string; size: number; uploadedAt: string};
+type Stage = '작성 중' | '제출' | '수정요청';
+
+const MB = 1024 * 1024;
+const MAX_COUNT = 5;
+const MAX_TOTAL = 20 * MB;
+
+const PRIVACY_NOTE = '승인되면 이 프로그램에 지원하는 회원 누구나 내려받을 수 있습니다. 연락처·학번 같은 개인정보는 넣지 마세요.';
+
+const FIRST: Attachment[] = [{id: 1, name: '커리큘럼_상세.pdf', size: Math.round(1.2 * MB), uploadedAt: '2026-03-02 14:05'}];
+
+// «+ 파일 올리기»를 누를 때마다 차례로 고르는 예시 파일. 셋째에서 합계 상한에, 다 올린 뒤에는 개수 상한에 걸리도록 크기를 골랐다.
+const PICKS: {name: string; size: number}[] = [
+  {name: '발표자료_1주차.pdf', size: Math.round(3.4 * MB)},
+  {name: '예제_데이터셋.pdf', size: Math.round(9.8 * MB)},
+  {name: '부록_실습자료.pdf', size: Math.round(7.5 * MB)},
+  {name: '참고문헌.md', size: 12 * 1024},
+  {name: '스터디_규칙.txt', size: 4 * 1024},
+];
+
+/** 서버 문장의 «남은 용량» 표기. 0.1MB 단위에서 내린다 — 부풀려 말하면 그 크기로 다시 골라도 막힌다 */
+function floorMb(bytes: number): string {
+  const tenths = Math.floor((bytes * 10) / MB);
+  const whole = Math.floor(tenths / 10);
+  return tenths % 10 === 0 ? `${whole}MB` : `${whole}.${tenths % 10}MB`;
+}
+
+/**
+ * 첨부 자료 카드 — 기획안 작성 마지막 페이지, 제출 뒤 상세, 수정요청 뒤 재제출 양식.
+ * 설명서 «첨부 자료 붙이기»(형식과 상한, 올리고 지울 수 있는 때, 지우면 바로 사라짐, 막히는 경우의 문구)를 따른다.
+ */
+export function ProposalAttachmentsMock(): ReactNode {
+  const [stage, setStage] = useState<Stage>('작성 중');
+  const [files, setFiles] = useState<Attachment[]>(FIRST);
+  const [pick, setPick] = useState(0);
+  const [error, setError] = useState('');
+  const [feedback, setFeedback] = useState<ReactNode>();
+
+  const editable = stage !== '제출';
+  const total = files.reduce((sum, f) => sum + f.size, 0);
+
+  const upload = () => {
+    if (files.length >= MAX_COUNT) {
+      setError(`첨부 자료는 ${MAX_COUNT}개까지 올릴 수 있습니다.`);
+      setFeedback('개수 상한에 걸렸습니다. 문구는 서버가 정한 그대로 카드 아래에 뜹니다. 하나를 지우면 다시 올릴 수 있습니다.');
+      return;
+    }
+    const next = PICKS[pick % PICKS.length];
+    setPick(pick + 1);
+    const remaining = MAX_TOTAL - total;
+    if (next.size > remaining) {
+      setError(`첨부 자료는 합계 20MB까지 올릴 수 있습니다. 남은 용량은 ${floorMb(remaining)}입니다.`);
+      setFeedback(`«${next.name}»(${formatFileSize(next.size)})는 남은 용량보다 커서 올라가지 않았습니다. 문구에 남은 용량이 함께 적히므로 무엇을 지울지 고를 수 있습니다.`);
+      return;
+    }
+    setFiles([...files, {id: Date.now(), name: next.name, size: next.size, uploadedAt: '2026-03-02 14:20'}]);
+    setError('');
+    setFeedback(`«${next.name}»를 올렸습니다. «제출하기»를 누르지 않아도 올린 순간 저장됩니다.`);
+  };
+
+  const remove = (f: Attachment) => {
+    setFiles(files.filter((x) => x.id !== f.id));
+    setError('');
+    setFeedback(`«${f.name}»를 지웠습니다. 확인 창 없이 바로 사라지고, 되살리려면 다시 올려야 합니다.`);
+  };
+
+  const download = (f: Attachment) =>
+    setFeedback(`«${f.name}»를 내려받습니다. 화면 안에서 열어 보는 미리보기는 없습니다.`);
+
+  return (
+    <MockFrame
+      caption={
+        stage === '제출'
+          ? '첨부 자료 — 제출한 기획안 상세 /my/applications/{formRspnsId} (읽기 전용)'
+          : stage === '수정요청'
+            ? '첨부 자료 — 수정요청을 받은 기획안의 재제출 양식, 마지막 페이지'
+            : '첨부 자료 — 기획안 제출 /proposals/new, 마지막 페이지'
+      }
+      hint="«+ 파일 올리기»를 여러 번 눌러 상한에 걸려 보고, «지우기»와 «제출하기»도 눌러 보세요."
+      feedback={feedback}
+      onReset={() => {
+        setStage('작성 중');
+        setFiles(FIRST);
+        setPick(0);
+        setError('');
+        setFeedback(undefined);
+      }}
+      demo={
+        <button
+          type="button"
+          disabled={stage !== '제출'}
+          onClick={() => {
+            setStage('수정요청');
+            setError('');
+            setFeedback('국장이 수정요청했습니다. 재제출 양식 마지막 페이지의 같은 카드에서 다시 올리고 지울 수 있습니다. 상세 화면의 읽기 전용 목록은 이때 사라집니다.');
+          }}>
+          국장이 «수정요청»
+        </button>
+      }
+      innerStyle={{minWidth: 'auto', maxWidth: 520, margin: '0 auto'}}>
+      <div className="mk-card">
+        <div style={{display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8}}>
+          <div style={{fontSize: 12.5, color: 'var(--app-n400)'}}>첨부 자료</div>
+          <div style={{flex: 1}} />
+          {editable && (
+            <div style={{fontSize: 12, color: 'var(--app-n500)'}}>
+              사용 {formatFileSize(total)} / 20MB
+            </div>
+          )}
+        </div>
+
+        {editable && (
+          <>
+            <p style={{fontSize: 12.5, color: 'var(--app-n500)', margin: '0 0 6px'}}>pdf·txt·md 파일을 5개까지, 합계 20MB까지 올릴 수 있습니다.</p>
+            <p
+              style={{
+                fontSize: 12.5,
+                lineHeight: 1.7,
+                margin: '0 0 8px',
+                padding: '7px 11px',
+                borderRadius: 10,
+                background: 'var(--app-amber-soft)',
+                color: 'var(--app-amber)',
+              }}>
+              {PRIVACY_NOTE}
+            </p>
+          </>
+        )}
+
+        {files.length === 0 && (
+          <div style={{fontSize: 13, color: 'var(--app-n500)', padding: '6px 0'}}>{editable ? '아직 올린 파일이 없습니다.' : '첨부 자료 없음'}</div>
+        )}
+        {files.map((f) => (
+          <FileRow
+            key={f.id}
+            name={f.name}
+            size={f.size}
+            uploadedAt={f.uploadedAt}
+            onDownload={() => download(f)}
+            onRemove={editable ? () => remove(f) : undefined}
+          />
+        ))}
+
+        {editable && (
+          <Btn variant="ghost" style={{marginTop: 10, fontSize: 13}} onClick={upload}>
+            + 파일 올리기
+          </Btn>
+        )}
+        {error && <p style={{fontSize: 12, color: 'var(--app-danger)', margin: '8px 0 0'}}>{error}</p>}
+      </div>
+
+      {editable && (
+        <Btn
+          variant="primary"
+          style={{width: '100%', justifyContent: 'center', padding: 11, borderRadius: 12, marginTop: 12}}
+          onClick={() => {
+            setStage('제출');
+            setError('');
+            setFeedback(
+              stage === '수정요청'
+                ? '다시 냈습니다. 첨부 자료는 다시 읽기 전용이 되고, 상세 화면에서 내려받기만 됩니다.'
+                : '제출했습니다. 이제 첨부 자료는 읽기 전용입니다. 상세 화면에서 내려받기만 되고, 국장이 수정요청을 보내야 다시 고칠 수 있습니다. 아래 띠를 눌러 보세요.',
+            );
+          }}>
+          {stage === '수정요청' ? '다시 제출하기' : '제출하기'}
+        </Btn>
+      )}
     </MockFrame>
   );
 }
