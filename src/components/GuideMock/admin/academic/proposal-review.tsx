@@ -1,5 +1,5 @@
 import {useState, type CSSProperties, type ReactNode} from 'react';
-import {Badge, Btn, Chip, MockFrame} from '../..';
+import {Badge, Btn, Chip, FileRow, MockFrame} from '../..';
 
 type Status = '제출' | '수정요청' | '승인' | '반려';
 type Kind = '스터디' | '프로젝트' | '트랙';
@@ -18,7 +18,11 @@ type Proposal = {
   plan: string;
   /** 커리큘럼 회차 수. null이면 형식이 어긋나 읽지 못한 기획안이다 */
   curriculum: number | null;
+  /** 제출자가 함께 낸 첨부 자료. 검토 화면에서는 읽기 전용이다 */
+  files: {name: string; size: number; uploadedAt: string}[];
 };
+
+const MB = 1024 * 1024;
 
 const LEADER: Record<Kind, string> = {스터디: '스터디장', 프로젝트: '프로젝트장', 트랙: '트랙장'};
 
@@ -43,6 +47,10 @@ const INITIAL: Proposal[] = [
     capacity: '6 ~ 10명',
     plan: '매주 화 19:00, 백준 골드 난이도',
     curriculum: 8,
+    files: [
+      {name: '커리큘럼_상세.pdf', size: Math.round(1.2 * MB), uploadedAt: '2026-03-02 14:05'},
+      {name: '참고문헌.md', size: 12 * 1024, uploadedAt: '2026-03-02 14:07'},
+    ],
   },
   {
     id: 'web',
@@ -56,6 +64,7 @@ const INITIAL: Proposal[] = [
     capacity: '2 ~ 4명',
     plan: '매주 토 14:00, 온라인 회의',
     curriculum: 10,
+    files: [],
   },
   {
     id: 'cloud',
@@ -69,6 +78,7 @@ const INITIAL: Proposal[] = [
     capacity: '4 ~ 8명',
     plan: '격주 목 19:00, 실습 위주',
     curriculum: null,
+    files: [{name: '실습환경_안내.pdf', size: Math.round(3.4 * MB), uploadedAt: '2026-03-03 10:12'}],
   },
 ];
 
@@ -92,7 +102,7 @@ function rowStyle(selected: boolean): CSSProperties {
 
 /**
  * 기획안 검토 — /proposals/review.
- * 설명서 «세 가지 처리»(승인은 되돌릴 수 없음, 수정요청은 사유 필수, 반려는 끝), «재제출된 기획안», «커리큘럼을 못 읽으면 승인이 잠깁니다»를 따른다.
+ * 설명서 «세 가지 처리»(승인은 되돌릴 수 없음, 수정요청은 사유 필수, 반려는 끝), «재제출된 기획안», «커리큘럼을 못 읽으면 승인이 잠깁니다», «첨부 자료 확인하기»(읽기 전용, 내려받기만)를 따른다.
  */
 export function ProposalReviewMock(): ReactNode {
   const [list, setList] = useState<Proposal[]>(INITIAL);
@@ -187,7 +197,7 @@ export function ProposalReviewMock(): ReactNode {
   return (
     <MockFrame
       caption="기획안 검토 — /proposals/review"
-      hint="왼쪽 칩으로 거르고 기획안을 골라 보세요. «승인» · «수정요청» · «반려»를 눌러 볼 수 있고, 수정요청은 사유를 적어야 보내집니다."
+      hint="왼쪽 칩으로 거르고 기획안을 골라 보세요. «승인» · «수정요청» · «반려»와 첨부 자료의 «내려받기»를 눌러 볼 수 있고, 수정요청은 사유를 적어야 보내집니다."
       feedback={feedback}
       onReset={() => {
         setList(INITIAL);
@@ -275,6 +285,27 @@ export function ProposalReviewMock(): ReactNode {
             <dt>운영 계획</dt>
             <dd>{sel.plan}</dd>
           </dl>
+
+          <div className="mk-section-label">첨부 자료</div>
+          <div style={{marginBottom: 14}}>
+            {sel.files.length === 0 ? (
+              <div style={{fontSize: 12.5, color: 'var(--app-n500)'}}>첨부 자료 없음</div>
+            ) : (
+              sel.files.map((f) => (
+                <FileRow
+                  key={f.name}
+                  name={f.name}
+                  size={f.size}
+                  uploadedAt={f.uploadedAt}
+                  onDownload={() =>
+                    setFeedback(
+                      `«${f.name}»를 내려받습니다. 화면 안에서 열어 보는 미리보기는 없습니다. 승인하면 이 파일은 지원하려는 회원 누구나 내려받으므로, 개인정보가 없는지 승인 전에 확인하세요.`,
+                    )
+                  }
+                />
+              ))
+            )}
+          </div>
 
           {readable ? (
             <>
