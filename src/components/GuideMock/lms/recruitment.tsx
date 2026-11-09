@@ -64,7 +64,8 @@ const STATUS_TONE: Record<RecruitStatus, 'amber' | 'blue' | 'grey'> = {
 
 /**
  * 모집 관리 — /studio/recruitment.
- * 설명서 «접수 상태 네 칩»(숫자는 거르기 전 기준), «지원 건수는 모집 시작 전에 -», «고칠 수 있는 때가 정해져 있습니다»를 따른다.
+ * 설명서 «접수 상태 네 칩»(숫자는 거르기 전 기준), «지원 건수는 모집 시작 전에 -», «고칠 수 있는 때가 정해져 있습니다»,
+ * «소개 글 고치기», «지원서 읽기»(지원자 보기는 접수가 열린 뒤에만)를 따른다.
  */
 export function RecruitmentMock(): ReactNode {
   const [chip, setChip] = useState<ChipName>('전체');
@@ -101,7 +102,7 @@ export function RecruitmentMock(): ReactNode {
           onClick={() => {
             setStarted(true);
             setFeedback(
-              '접수 시작 일시(3월 2일 09:00)가 지났습니다. «알고리즘 스터디»가 접수중이 되고 버튼이 «지원서 문항 보기»로 바뀝니다. 이제 문항을 고칠 수 없고, 지원 건수가 «-» 대신 숫자로 나옵니다.',
+              '접수 시작 일시(3월 2일 09:00)가 지났습니다. «알고리즘 스터디»가 접수중이 되고 버튼이 «지원서 문항 보기»로 바뀝니다. 이제 문항을 고칠 수 없고, 지원 건수가 «-» 대신 숫자로 나옵니다. «지원자 보기» 버튼도 이때 생깁니다.',
             );
           }}>
           «알고리즘 스터디»의 접수 시작 일시가 지남
@@ -120,10 +121,22 @@ export function RecruitmentMock(): ReactNode {
           const open = p.status !== '모집 시작 전';
           return (
             <div key={p.name} className={p.name === PROGRAMS[0].name && started ? 'mk-card gm-flash' : 'mk-card'}>
-              <div style={{display: 'flex', gap: 5, alignItems: 'center', marginBottom: 7}}>
+              <div style={{display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap', marginBottom: 7}}>
                 <Badge tone={STATUS_TONE[p.status]}>{p.status}</Badge>
                 <Badge tone="outline">{p.kind}</Badge>
                 <span style={{flex: 1}} />
+                {/* 실제 카드의 버튼 순서 그대로 — 소개 글 · 지원서 문항 · 지원자 보기(접수가 열린 뒤에만) */}
+                <Btn
+                  style={{background: 'transparent', color: 'inherit'}}
+                  onClick={() =>
+                    setFeedback(
+                      p.status === '접수 종료'
+                        ? '접수가 끝나 «소개 글 보기»로 바뀝니다. 소개 글은 읽기만 할 수 있습니다.'
+                        : '소개 글 편집(/studio/programs/{활동번호}/event-post)으로 갑니다. 소개 글은 접수 중에도 고칠 수 있습니다.',
+                    )
+                  }>
+                  {p.status === '접수 종료' ? '소개 글 보기' : '소개 글 편집'}
+                </Btn>
                 <Btn
                   style={{background: 'transparent', color: 'inherit'}}
                   onClick={() =>
@@ -135,6 +148,17 @@ export function RecruitmentMock(): ReactNode {
                   }>
                   {open ? '지원서 문항 보기' : '지원서 문항 편집'}
                 </Btn>
+                {open && (
+                  <Btn
+                    style={{background: 'transparent', color: 'inherit'}}
+                    onClick={() =>
+                      setFeedback(
+                        `지원자 목록(/studio/programs/{활동번호}/applications)으로 갑니다. 들어온 지원서 ${p.applicants}건을 읽기만 합니다. 선발은 학술국장이 운영관리 앱에서 합니다.`,
+                      )
+                    }>
+                    지원자 보기 {p.applicants}
+                  </Btn>
+                )}
               </div>
               <div style={{fontSize: 15, fontWeight: 600, color: 'var(--app-ink)'}}>{p.name}</div>
               <div style={{fontSize: 12, color: 'var(--app-n500)', marginTop: 4}}>{p.approved}</div>
