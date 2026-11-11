@@ -184,7 +184,7 @@ export function AssigneePickerMock(): ReactNode {
   const message = picked
     ? '선택한 회원이 담당자로 저장됩니다'
     : left
-      ? '현재 담당자는 이제 지정할 수 없는 회원입니다 — 다른 회원으로 바꿔주세요'
+      ? '현재 담당자는 후보 목록에 없습니다. 바꾸지 않으면 그대로 저장됩니다.'
       : '비우면 현재 담당자 그대로입니다';
 
   const choose = (c: Candidate | null) => {
@@ -193,7 +193,7 @@ export function AssigneePickerMock(): ReactNode {
     if (c) {
       setFeedback(`«${label(c)}»을 골랐습니다. 저장하면 이 회원이 담당자가 됩니다.`);
     } else if (left) {
-      setFeedback(`비웠습니다. 현재 담당자(${CURRENT.name})가 후보에서 빠졌으므로 다른 회원으로 바꿔야 저장됩니다.`);
+      setFeedback(`비웠습니다. 현재 담당자(${CURRENT.name})는 후보에 없지만, 담당자를 바꾸지 않았으니 저장해도 그대로입니다.`);
     } else {
       setFeedback(`비웠습니다. 새 담당자를 고르지 않았으니 저장해도 담당자는 지금 그대로(${CURRENT.name})입니다.`);
     }
@@ -219,7 +219,7 @@ export function AssigneePickerMock(): ReactNode {
             setPicked(null);
             setOpen(false);
             setFeedback(
-              `현재 담당자(${CURRENT.name})가 탈퇴해 후보에서 빠졌습니다. 목록 맨 위에 «현재: ${CURRENT.name}»로 남아 누구였는지는 알 수 있지만, 다른 회원으로 바꿔야 저장됩니다.`,
+              `현재 담당자(${CURRENT.name})가 탈퇴해 후보에서 빠졌습니다. 목록 맨 위에 «현재: ${CURRENT.name}»로 남고, 담당자를 바꾸지 않으면 그대로 저장됩니다.`,
             );
           }}>
           현재 담당자({CURRENT.name})가 탈퇴함
@@ -238,7 +238,7 @@ export function AssigneePickerMock(): ReactNode {
             setOpen(!open);
             if (!open) {
               setFeedback(
-                '펼쳐 고르는 목록입니다. 이름 옆의 기수와 역할로 동명이인을 가립니다. 업무는 업무 관리 권한이 있는 사람(국장 이상)만 후보에 오릅니다.',
+                '펼쳐 고르는 목록입니다. 이름 옆의 기수와 역할로 동명이인을 가립니다. 업무는 업무 관리 권한이 있는 사람(국장 이상)만, 하위 업무는 국원 이상만 후보에 오릅니다.',
               );
             }
           }}
